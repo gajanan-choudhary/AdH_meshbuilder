@@ -1,0 +1,50 @@
+// General
+NSUPMOD
+NSUBMOD
+SUPMOD 
+SUBMOD 
+NAME   
+NROWS  
+NCOLS  
+NCORND 
+ND     
+EGS    
+WSE    
+// Series
+SERIES 
+BC     
+AWRITE 
+DT     
+// Tolerances
+IP     
+MIT    
+NIT    
+ITL    
+NTL    
+// Time
+TEM    
+T0     
+TF     
+// Boundary conditions
+VEL    
+DIS    
+OTW    
+// Transport
+TRN    
+DF     
+TRT    
+CN     
+CON    
+SAL    
+// Number of interfaces
+NUMIFC 
+INTFCE 
+HY     
+EXT    
+INT    
+CPL    
+// Miscellaneous
+START  
+END    
+COMMON 
+FOUT   
