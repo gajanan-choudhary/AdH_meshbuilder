@@ -27,5 +27,6 @@ set(CMAKE_EXE_LINKER_FLAGS "-lm")
 
 add_subdirectory(structs)
 add_subdirectory(builder)
+add_subdirectory(input)
 add_subdirectory(output)
 add_subdirectory(main)

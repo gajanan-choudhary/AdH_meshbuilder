@@ -10,5 +10,6 @@ add_executable(meshbuilder ${meshbuilder_sources})
 target_link_libraries(meshbuilder
   structs
   builder
+  input
   output
  )
