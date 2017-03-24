@@ -1,14 +1,20 @@
+#ifndef _MACROS
+#define _MACROS
 /******************************************************************************************************************************************************************************************************/
 // Generic macros
 
-#define max2(a, b) (a>b?a:b);
-#define min2(a, b) (a<b?a:b);
-#define max3(a,b,c) (max2(max2(a,b),c);
-#define min3(a,b,c) (min2(min2(a,b),c);
-#define fabs(a) (a>0?a:-a);
+#define max2(a, b)  ( ((a)>(b)) ? (a) : (b) )
+#define min2(a, b)  ( ((a)<(b)) ? (a) : (b) )
+//#define max3(a,b,c) (max2(max2(a,b),c) /* Something's wrong */
+//#define min3(a,b,c) (min2(min2(a,b),c) /* Something's wrong */
+#define max4(a,b,c,d) max2(max2(a,b),max2(c,d))
+#define min4(a,b,c,d) min2(min2(a,b),min2(c,d))
 
-#define throw_error(s) {printf("\n\n"); printf(s); printf("\n\n"); \ exit(-1);}
-
+#define throw_error(s) {printf("\n\n"); printf(s); printf("\n\n"); exit(-1);}
+#define checkmem(ptr) \
+    if (ptr == NULL){ \
+        throw_error("Error: Could not allocate memory properly"); \
+    }
 /******************************************************************************************************************************************************************************************************/
 // Coordinate Geometry
 #define VECT2D_DOT(v1,v2) (v1.x*v2.x + v1.y*v2.y);
@@ -21,6 +27,7 @@
 
 #define PROJECTED_DISTANCE(x1,y1,x2,y2) sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
 #define PROJECTED_AREA(x1,y1,x2,y2,x3,y3) ((x1*y2+x2*y3+x3*y1)-(x2*y1+x3*y2+x1*y3))/2.0;
+#define TRIANGLE_AREA(xy,n1,n2,n3) ((xy[n1].x*xy[n2].y+xy[n2].x*xy[n3].y+xy[n3].x*xy[n1].y)-(xy[n2].x*xy[n1].y+xy[n3].x*xy[n2].y+xy[n1].x*xy[n3].y))/2.0;
 #define VECT2D_AREA(v1,v2)  VECT2D_CROSS(v1,v2)/2.0;
 
 /******************************************************************************************************************************************************************************************************/
@@ -32,27 +39,55 @@
 //#define ELEM2D_AREA(e) ((e.coord[0].x*e.coord[1].y + e.coord[1].x*e.coord[2].y + e.coord[2].x*e.coord[0].y) - (e.coord[1].x*e.coord[0].y + e.coord[2].x*e.coord[1].y + e.coord[0].x*e.coord[2].y))/2.0;
 //#define AREA(x, n1, n2, n3) ((xyz[n1].x*xyz[n2].y + xyz[n2].x*xyz[n3].y + xyz[n3].x*xyz[n1].y) - (xyz[n2].x*xyz[n1].y + xyz[n3].x*xyz[n2].y + xyz[n1].x*xyz[n3].y))/2.0;
 
-#define ELEM2D_STORE_NODE_COORDS(e, coord) \
-    e.coord[0].x = coord[e.nodes[0]].x; \
-    e.coord[0].y = coord[e.nodes[0]].y; \
-                                        \
-    e.coord[1].x = coord[e.nodes[1]].x; \
-    e.coord[1].y = coord[e.nodes[1]].y; \
-                                        \
-    e.coord[2].x = coord[e.nodes[2]].x; \
-    e.coord[2].y = coord[e.nodes[2]].y;
+#define leftmostx(nodes)    min4(nodes[0].x, nodes[1].x, nodes[2].x, nodes[3].x)
+#define rightmostx(nodes)   max4(nodes[0].x, nodes[1].x, nodes[2].x, nodes[3].x)
+#define bottommosty(nodes)  min4(nodes[0].y, nodes[1].y, nodes[2].y, nodes[3].y)
+#define topmosty(nodes)     max4(nodes[0].y, nodes[1].y, nodes[2].y, nodes[3].y)
+// #define CREATE_ELEM2D(e, j, nrows, i, ncols, xyz, nodes)                                       
+//     nodes[0] = i*nrows+j;                                                                      
+//     nodes[1] = nodes[0]+1;                                                                     
+//     nodes[2] = nodes[0]+nrows;                                                                 
+//     nodes[3] = nodes[2]+1;                                                                     
+//     /* We know that nodes [0] is diagonally opposite to nodes 4 by above definition. */        
+//     if (xyz[nodes[0]].x < xyz[nodes[3]].x) /* node[0] is on the left, node[3] on the right */  
+//         if(xyz[nodes[0]].y < xyz[nodes[3].y]){                                                 
+//             /* node[0] is bottom-left, node[3] is top-right*/                                  
+//         }                                                                                      
+//         else{                                                                                  
+//             /* node[0] is top-left, node[3] is bottom-right */                                 
+//         }                                                                                      
+//     }                                                                                          
+//     else{ /* node[0] is on the right, node[3] on the left */                                   
+//         if(xyz[nodes[0]].y < xyz[nodes[3].y]){                                                 
+//             /* node[0] is bottom-right, node[3] is top-left*/                                  
+//         }                                                                                      
+//         else{                                                                                  
+//             /* node[0] is top-right, node[3] is bottom-left */                                 
+//         }                                                                                      
+//     }                                                                                          
+    
+
+#define ELEM2D_STORE_NODE_COORDS(e, xyz) \
+    e.coord[0].x = xyz[e.nodes[0]].x; \
+    e.coord[0].y = xyz[e.nodes[0]].y; \
+                                      \
+    e.coord[1].x = xyz[e.nodes[1]].x; \
+    e.coord[1].y = xyz[e.nodes[1]].y; \
+                                      \
+    e.coord[2].x = xyz[e.nodes[2]].x; \
+    e.coord[2].y = xyz[e.nodes[2]].y;
 
 #define CREATE_ELEM2D(e, xyz, node0, node1, node2) \
-    e.area = PROJECTED_AREA(xyz,node0,node1,node2); \
+    e.area = TRIANGLE_AREA(xyz,node0,node1,node2); \
     if (e.area > 0) { \
         e.nodes[0] = node0; \
         e.nodes[1] = node1; \
         e.nodes[2] = node2; \
     } \
     else{ \
-        e.nodes[0] = node0; \
-        e.nodes[1] = node2; \
-        e.nodes[2] = node1; \
+        e.nodes[0] = node2; \
+        e.nodes[1] = node1; \
+        e.nodes[2] = node0; \
         e.area = -e.area; \
     } \
     ELEM2D_STORE_NODE_COORDS(e, xyz);
@@ -96,3 +131,4 @@
     ans.z = (corners[0].z*(1-ksi)*(1-eta) + corners[1].z*(1-ksi)*(1+eta) + corners[2].z*(1+ksi)*(1+eta) + corners[3].z*(1+ksi)*(1-eta))/4.0;
 
 /******************************************************************************************************************************************************************************************************/
+#endif
