@@ -1,5 +1,5 @@
-#ifndef _VECTORS
-#define _VECTORS
+#ifndef _VECTORS_H
+#define _VECTORS_H
 
 typedef struct{
     double x;

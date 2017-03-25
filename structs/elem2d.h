@@ -1,5 +1,5 @@
-#ifndef _ELEM2D
-#define _ELEM2D
+#ifndef _ELEM2D_H
+#define _ELEM2D_H
 
 typedef struct{
     int type;                 // Type = BOUNDARY or INTERIOR

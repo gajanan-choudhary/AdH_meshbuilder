@@ -23,8 +23,8 @@ ITL
 NTL    
 // Time
 TEM    
-T0     
-TF     
+TSTART 
+TEND   
 // Boundary conditions
 VEL    
 DIS    
@@ -47,4 +47,5 @@ CPL
 START  
 END    
 COMMON 
+NO     
 FOUT   

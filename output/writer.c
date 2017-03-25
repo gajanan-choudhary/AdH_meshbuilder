@@ -17,6 +17,7 @@ void write_mesh_file(MESH *mesh){
 
 
     fprintf(outfile, "MESH2D");
+    fprintf(outfile, "\nMESHNAME \"%s\"", mesh->name);
     fprintf(outfile, "\n#Elements = %i", mesh->nelems2d);
     fprintf(outfile, "\n#Nodes    = %i", mesh->nnodes);
     for (i=0; i<mesh->nelems2d; i++){
@@ -91,13 +92,13 @@ void write_bc_file(MESH *mesh){
 
     fprintf(outfile,"\n#BCS\n");
     for (i=0; i<NCORNERS; i++){
-        switch (mesh->edge[i].str){
+        switch (mesh->boundary[i].str){
             case VEL:
                 fprintf(outfile,"\nNB VEL %3i %3i", i+2,i+1);
-                if (abs(mesh->edge[i].bc_value) < SMALL) {
+                if (abs(mesh->boundary[i].bc_value) < SMALL) {
                     fprintf(outfile,"        ! No Flow");
                 }
-                else if (mesh->edge[i].bc_value > SMALL) {
+                else if (mesh->boundary[i].bc_value > SMALL) {
                     fprintf(outfile,"        ! Inflow");
                 }
                 else {
@@ -106,10 +107,10 @@ void write_bc_file(MESH *mesh){
                 break;
             case DIS:
                 fprintf(outfile,"\nNB DIS %3i %3i", i+2,i+1);
-                if (abs(mesh->edge[i].bc_value) < SMALL) {
+                if (abs(mesh->boundary[i].bc_value) < SMALL) {
                     fprintf(outfile,"        ! No Flow");
                 }
-                else if (mesh->edge[i].bc_value > SMALL) {
+                else if (mesh->boundary[i].bc_value > SMALL) {
                     fprintf(outfile,"        ! Inflow");
                 }
                 else {
@@ -159,7 +160,7 @@ void write_hotstart_file(MESH *mesh){
     fprintf(outfile,"NAME IOH\n");
     fprintf(outfile,"TS 0 0\n");
     for (i=0; i<mesh->nnodes; i++){
-        fprintf(outfile,"    % 23.14e\n",mesh->depth[i]);
+        fprintf(outfile,"    % 23.14e\n", (mesh->xyz[i].z - mesh->wse[i]));
     }
 
     fprintf(outfile, "ENDDS");

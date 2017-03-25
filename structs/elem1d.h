@@ -1,5 +1,5 @@
-#ifndef _ELEM1D
-#define _ELEM1D
+#ifndef _ELEM1D_H
+#define _ELEM1D_H
 
 typedef struct{
     int str;                  // Edgestring ID

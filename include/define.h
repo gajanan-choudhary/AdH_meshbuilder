@@ -1,8 +1,12 @@
+#ifndef _DEFINE_H
+#define _DEFINE_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <assert.h>
 #include <string.h>
+#include <ctype.h>
 #include <math.h>
 //#include <float.h>
 //#include <limits.h>
@@ -10,13 +14,18 @@
 
 /* Constants */
 #define SMALL  1.0e-6
-#define MAXLINE 250
 #define ON     1
 #define OFF    0
 #define YES    1
 #define NO    -3
 #define TRUE   1
 #define FALSE  0
+
+/* I/O */
+#define MAXLINE 250
+#define MAX_INT_LENGTH 9
+#define READ_SUCCESS   1
+#define READ_FAILURE   0
 
 /* Problem */
 #define NDIM     3 /* Problem dimension, Just ignore this! */
@@ -30,3 +39,5 @@
 #define DIS 20     /* NB DIS bc */
 #define OTW 30     /* NB OTW bc */
 #define INT 40     /* HY INT bc */
+
+#endif

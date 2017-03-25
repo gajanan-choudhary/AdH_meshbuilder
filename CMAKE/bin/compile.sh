@@ -107,7 +107,7 @@ if [ $cleanstatus -gt 0 ]; then
   shortecho
   echo "Cleaning previous build, if any..."
   echo "     - Deleting folders"
-  rm -r bin/meshbuilder bin/runoutput.txt CMakeFiles main structs builder lib input output  >& /dev/null
+  rm -r bin/meshbuilder bin/runoutput.txt bin/*.3dm bin/*.bc bin/*.hot CMakeFiles main structs builder lib input output  >& /dev/null
   echo "     - Deleting remaining files"
   rm Makefile cmake_install.cmake CMakeCache.txt >& /dev/null
   echo "     - Cleaning complete"

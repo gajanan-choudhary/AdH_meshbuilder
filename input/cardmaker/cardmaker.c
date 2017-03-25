@@ -6,7 +6,7 @@
 #define NO -3
 #define infilename "cardmaker_input.inp"
 #define outfilename "cards.h"
-static int DEBUG = 1;
+static int DEBUG = 0;
 
 void remove_spaces(char *instr, char **outstr){
     char *i = instr;
@@ -66,20 +66,29 @@ int main(/*int argc, char **argv*/) {
     while (fgets(line, MAXLINE, infile)!=NULL){
         data = line;
         cardvalue = OFF;
-        if (DEBUG) printf("\nLine = %s", line);
         cardvalue = parse_card(data, &subdata);
-        if (DEBUG) printf("Card Value = %14u", cardvalue);
-        fprintf(outfile,",\n    ");
-        len = strlen(line);
+        remove_spaces(data,&subdata);
+        len = strlen(subdata);
+
+        if (DEBUG){
+            printf("\nLine = %s", line);
+            printf("Card Value = %14u", cardvalue);
+            printf("\nString Length = %i", len);
+        }
+
         if (cardvalue != NO){
-            if (DEBUG) printf("\nString Length = %i", len);
-            for (i=0; i<len-1; i++) fprintf(outfile,"%c",line[i]);
+            fprintf(outfile,",\n    CARD_");
+            for (i=0; i<len-1; i++){
+//                if (line[i]!=' ' && line[i]!='\t'){
+                    fprintf(outfile,"%c",subdata[i]);
+//                }
+            }
             fprintf(outfile," = %14u", cardvalue);
         }
         else {
-            for (i=0; i<len-1; i++) fprintf(outfile,"%c",line[i]);
+            fprintf(outfile,",\n    ");
+            for (i=0; i<len-1; i++) fprintf(outfile,"%c",subdata[i]);
         }
-        data = subdata;
     }
 
     fprintf(outfile,"\n} CARD;");
