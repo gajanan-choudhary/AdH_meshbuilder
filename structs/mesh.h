@@ -3,7 +3,6 @@
 
 typedef struct{
     int supID, subID;         // Supermodel and submodel ID's, starting from 0
-    char name[MAXLINE];       // Name of the mesh for writing mesh files
     int nrows;                // Number of nodes in the a column
     int ncols;                // Number of nodes in the a row
     int nnodes;
@@ -11,11 +10,19 @@ typedef struct{
     int nelems1d;
     int ncorners;             // Number of corners in the domain. #defined to 4 right now.
     int nboundaries;          // Number of edges/boundaries of the domain. 4 for quadrilateral.
+    int nseries;
 
+    /* Data expected to be common to all meshes below. Inefficient, I know, but futureproofing. */
+    int trn, tem;             // Transport, Second order time stepping.
+    int nit, mit;             // Solver iterations.
+    double ntl, itl;          // Solver tolerances.
+    double mng;               // Manning's friction value.
+    double t0, tf, dt;        // Starting and ending times, and time step.
+    double awrite;            // Used for creating SERIES AWRITE.
+    /* Data expected to be common to all meshes above. Inefficient, I know, but futureproofing. */
 
-    double t0, tf, dt;        // Starting and ending times, and time step
-    double awrite_interval;   // Used for creating SERIES AWRITE
     double *wse;              // Initial condition for the water surface elevation, size = nnodes
+    double *series;           // Contains series values for BC's
 
     VECT3D *cornernodes;      // Corner nodes' co-ordinates, starting bottom left, going anticlockwise
     VECT3D *xyz;              // Co-ordinates of all nodes, bathymetry in the third co-ordinate
@@ -24,8 +31,11 @@ typedef struct{
     ELEM1D *boundary;         // Boundary edges
     ELEM1D *elem1d;           // Edge elements for the boundary
 
+    char name[MAXLINE];       // Name of the mesh for writing mesh files
+
 } MESH;
 
+void mesh_defaults(MESH *mesh, int nmeshes);
 void mesh_init(MESH *mesh);
 void mesh_free(MESH **mesh_ptr, int nmeshes);
 

@@ -9,12 +9,50 @@
 //     else{
 //         throw_error("Error in memory allocation for mesh. Could not allocate memory");
 //     }
+
+void mesh_defaults(MESH *mesh, int nmeshes){
+    int i;
+    for (i=0; i<nmeshes; i++){
+        mesh[i].supID       = NO;
+        mesh[i].subID       = NO;
+        mesh[i].nrows       = 0;
+        mesh[i].ncols       = 0;
+        mesh[i].nnodes      = 0;
+        mesh[i].nelems2d    = 0;
+        mesh[i].nelems1d    = 0;
+        mesh[i].ncorners    = 0;
+        mesh[i].nboundaries = 0;
+        mesh[i].nseries     = 0;
+
+        mesh[i].trn    = NO;
+        mesh[i].tem    = NO;
+        mesh[i].nit    = 20;
+        mesh[i].mit    = 500;
+        mesh[i].ntl    = 1.000E-09;
+        mesh[i].itl    = 1.000E-09;
+        mesh[i].mng    = 0.000E+00;
+        mesh[i].t0     = 0.000E+00;
+        mesh[i].tf     = 1.000E+04;
+        mesh[i].dt     = 1.000E+02;
+        mesh[i].awrite = 1.000E+02;
+
+        mesh[i].wse         = NULL;
+        mesh[i].series      = NULL;
+        mesh[i].cornernodes = NULL;
+        mesh[i].xyz         = NULL;
+        mesh[i].elem2d      = NULL;
+        mesh[i].boundary    = NULL;
+        mesh[i].elem1d      = NULL;
+    }
+}
+
 void mesh_init(MESH *mesh){
     int i, j; /* Loop counters */
 
     assert(mesh->nrows>1);
     assert(mesh->ncols>1);
     assert(mesh->ncorners==NCORNERS);
+    assert(mesh->nseries>1);
 
     //mesh->name = (char *) malloc(sizeof(char) * MAXLINE);
     //sprintf(mesh->name, "mesh");
@@ -23,20 +61,23 @@ void mesh_init(MESH *mesh){
     mesh->nelems1d = 2*((mesh->nrows-1)+(mesh->ncols-1));
     mesh->nboundaries = mesh->ncorners; /* Quadrilateral domain, by choice */
 
+    mesh->wse = (double *) malloc(sizeof(double) * mesh->nnodes);
+    checkmem(mesh->wse);
+
+    mesh->series = (double *) malloc(sizeof(double) * mesh->nseries);
+    checkmem(mesh->series);
+
     mesh->cornernodes = (VECT3D *) malloc(sizeof(VECT3D) * mesh->ncorners);
     checkmem(mesh->cornernodes);
-
-    mesh->boundary = (ELEM1D *) malloc(sizeof(ELEM1D) * mesh->nboundaries);
-    checkmem(mesh->boundary);
 
     mesh->xyz = (VECT3D *) malloc(sizeof(VECT3D) * mesh->nnodes);
     checkmem(mesh->xyz);
 
-    mesh->wse = (double *) malloc(sizeof(double) * mesh->nnodes);
-    checkmem(mesh->wse);
-
     mesh->elem2d = (ELEM2D *) malloc(sizeof(ELEM2D) * mesh->nelems2d);
     checkmem(mesh->elem2d);
+
+    mesh->boundary = (ELEM1D *) malloc(sizeof(ELEM1D) * mesh->nboundaries);
+    checkmem(mesh->boundary);
 
     mesh->elem1d = (ELEM1D *) malloc(sizeof(ELEM1D) * mesh->nelems1d);
     checkmem(mesh->elem1d);
@@ -73,9 +114,10 @@ void mesh_free(MESH **mesh_ptr, int nmeshes){
     int i;
     for (i=0; i<nmeshes; i++){
         //free((*mesh_ptr)[i].name);
+        free((*mesh_ptr)[i].wse);
+        free((*mesh_ptr)[i].series);
         free((*mesh_ptr)[i].cornernodes);
         free((*mesh_ptr)[i].xyz);
-        free((*mesh_ptr)[i].wse);
         free((*mesh_ptr)[i].elem2d);
         free((*mesh_ptr)[i].boundary);
         free((*mesh_ptr)[i].elem1d);

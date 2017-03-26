@@ -1,6 +1,6 @@
 #include "global_header.h"
 
-static int DEBUG = ON;
+static int DEBUG = OFF;
 
 /***************************************************************************************************************************************/
 /***************************************************************************************************************************************/
@@ -10,18 +10,18 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
     char *data;          /* Pointer moving along the string stored in 'line[]' */
     int tempint, status; /* For using read_int_field */
     double tempdouble;   /* For using read_dbl_filed */
-    CARD card;
 
-    int i;
+    int i=0, imesh=-1;   /* Counters */
+    int iscommon = 0;    /* Used to make sure there's one each of COMMON START and COMMON END cards in the input file. */
     int nsupmod = NO;
-    *nummeshes = 0;
-    MESH *mesh; /* Alias */
-    int imesh=0;
+    CARD card;
+    MESH *mesh = NULL;   /* Alias */
 
     FILE *infile = fopen(infilename, "r");
-    *mesh_ptr = NULL; /* Just making sure. */
 
     /* Reading input file to determine the total number of meshes to allocate memory for. */
+    *mesh_ptr = NULL; /* Just making sure to start off with. */
+    *nummeshes = 0;
     while (fgets(line, MAXLINE, infile)!=NULL && *mesh_ptr==NULL){
         data = line;
         card = parse_card(&data);
@@ -59,12 +59,12 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
         }
     }
 
+    mesh_defaults(*mesh_ptr, *nummeshes);
 
     /* Reading input file to allocate memory of variables within each MESH struct. */
     /* Need supID, subID, name, nrows, ncols, and ncorners. */
     rewind(infile);
     imesh = -1;
-    mesh = NULL;// &((*mesh_ptr)[0]);
     while (fgets(line, MAXLINE, infile)!=NULL){
         data = line;
         card = parse_card(&data);
@@ -78,7 +78,7 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                 tempint = read_int_field(&data,&status);
                 if (tempint<1) throw_error("Expected positive int field");
                 if (status==READ_SUCCESS) mesh->supID = tempint;
-                if (DEBUG) printf("\nisupmod = %i", mesh->supID);
+                if (DEBUG) printf("\nmesh->supID = %i", mesh->supID);
                 mesh->supID--;
                 card = parse_card(&data);
                 switch (card){
@@ -86,13 +86,12 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                         tempint = read_int_field(&data,&status);
                         if (tempint<1) throw_error("Expected positive int field");
                         if (status==READ_SUCCESS) mesh->subID = tempint;
-                        if (DEBUG) printf("\nisubmod = %i", mesh->subID);
+                        if (DEBUG) printf("\nmesh->subID = %i", mesh->subID);
                         mesh->subID--;
                         switch (parse_card(&data)){
                              case CARD_NAME:
                                  remove_spaces(&data);
                                  char *i = data;
-                                 printf("\nExtracting name from string = %s", i);
                                  //read_word_field(&data);
                                  int namelength=0;
                                  while (*i!=' ' && *i!='\t' && *i!='\n' && *i!=0){ /* Caution: Temporary fix only! */
@@ -105,9 +104,7 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                                      }
                                  }
                                  strncpy(mesh->name, data, (size_t) namelength);
-                                 //sprintf(i,"");
-                                 //sprintf(mesh->name, data);
-                                 printf("\nMesh name = |%s|", mesh->name);
+                                 if (DEBUG) printf("\nMesh name = |%s|", mesh->name);
                                  break;
                              default:
                                  throw_error("Expected card NAME with cards SUBMOD and SUPMOD.");
@@ -138,6 +135,17 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                 if (DEBUG) printf("\nmesh->ncorners = %i", mesh->ncorners);
                 assert (mesh->ncorners==NCORNERS);
                 break;
+            case CARD_BC:
+                tempint = read_int_field(&data,&status);
+                if (tempint<1) throw_error("Expected positive int field");
+                if (status==READ_SUCCESS) mesh->nseries = max2(tempint,mesh->nseries);
+                if (DEBUG) printf("\nmesh->nseries = %i", mesh->nseries);
+                break;
+            case CARD_COMMON:
+                card = parse_card(&data);
+                if (card == CARD_START) iscommon++;
+                if ((card == CARD_END) && (iscommon==1)) iscommon++;
+                break;
             case CARD_NO:
 #ifdef _DEBUG
                 // if (DEBUG) printf("\nNo card in this line!");
@@ -148,6 +156,7 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                 break;
         }
     }
+    if (iscommon != 2) throw_error("There must be exactly one each of COMMON START and COMMON END cards in the input file, with the cards in between indicating data common between all supermodel and submodel meshes");
 
     /* Allocating and initializing memory for variables within each mesh. */
     for (i=0; i<*nummeshes; i++){
@@ -174,7 +183,7 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
             case CARD_ND:
                 tempint = read_int_field(&data,&status);
                 if (tempint<1 || tempint>mesh->ncorners)
-                    throw_error("Node ID need to lie between 1 and NCORND <ncorners>, inclusive");
+                    throw_error("Node IDs need to lie between 1 and NCORND <ncorners>, inclusive");
                 if (status==READ_SUCCESS){
                     tempint--;
                     tempdouble = read_dbl_field(&data, &status);
@@ -190,7 +199,7 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
             case CARD_WSE:
                 tempint = read_int_field(&data,&status);
                 if (tempint<1 || tempint>mesh->ncorners)
-                    throw_error("Node ID need to lie between 1 and NCORND <ncorners>, inclusive");
+                    throw_error("Node IDs need to lie between 1 and NCORND <ncorners>, inclusive");
                 if (status==READ_SUCCESS){
                     tempint--;
                     tempdouble = read_dbl_field(&data, &status);
@@ -201,7 +210,7 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
             case CARD_EGS:
                 tempint = read_int_field(&data,&status);
                 if (tempint<1 || tempint>mesh->ncorners)
-                    throw_error("Node ID need to lie between 1 and NCORND <ncorners>, inclusive");
+                    throw_error("Boundary IDs need to lie between 1 and NCORND <ncorners>, inclusive");
                 if (status==READ_SUCCESS){
                     int ib = tempint-1;
                     for (i=0; i<NDONSEG; i++){
@@ -211,7 +220,66 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                     if (DEBUG) printf("\nmesh->boundary[%i].nodes = (% 2i, % 2i)", ib+1,
                                    mesh->boundary[ib].nodes[0], mesh->boundary[ib].nodes[1]);
                 }
-                break; 
+                break;
+            case CARD_BC:
+                tempint = read_int_field(&data,&status);
+                if (tempint<1) throw_error("Expected a positive int field");
+                if (status==READ_SUCCESS){
+                    tempint--;
+                    tempdouble = read_dbl_field(&data, &status);
+                    if (status == READ_SUCCESS) mesh->series[tempint] = tempdouble;
+                }
+                break;
+            case CARD_INT:
+                tempint = read_int_field(&data,&status);
+                if (tempint<1) throw_error("Boundary IDs need to lie between 1 and NCORND <ncorners>, inclusive");
+                if (status==READ_SUCCESS) tempint--;
+                mesh->boundary[tempint].str = tempint + SHIFT_EDGESTRING_IDS; /* Numbering starting 0 for storage. 1 will be added while writing output. */
+                mesh->boundary[tempint].type = STRONG_INTERFACE;
+                break;
+            case CARD_EXT:
+                tempint = read_int_field(&data,&status);
+                if (tempint<1) throw_error("Boundary IDs need to lie between 1 and NCORND <ncorners>, inclusive");
+                if (status==READ_SUCCESS) tempint--;
+                mesh->boundary[tempint].str = tempint + SHIFT_EDGESTRING_IDS; /* Numbering starting 0 for storage. 1 will be added while writing output. */
+                mesh->boundary[tempint].type = WEAK_INTERFACE;
+                break;
+            case CARD_VEL:
+                tempint = read_int_field(&data,&status);
+                if (tempint<1) throw_error("Boundary IDs need to lie between 1 and NCORND <ncorners>, inclusive");
+                if (status==READ_SUCCESS){
+                    int ib = tempint-1;
+                    mesh->boundary[ib].str = ib + SHIFT_EDGESTRING_IDS; /* Numbering starting 0 for storage. 1 will be added while writing output. */
+                    tempint = read_int_field(&data, &status);
+                    if (status == READ_SUCCESS) tempint--;
+                    mesh->boundary[ib].type = FLOW;
+                    mesh->boundary[ib].bc_series = tempint;
+                }
+                break;
+            case CARD_OTW:
+                tempint = read_int_field(&data,&status);
+                if (tempint<1) throw_error("Boundary IDs need to lie between 1 and NCORND <ncorners>, inclusive");
+                if (status==READ_SUCCESS){
+                    int ib = tempint-1;
+                    mesh->boundary[ib].str = ib + SHIFT_EDGESTRING_IDS; /* Numbering starting 0 for storage. 1 will be added while writing output. */
+                    tempint = read_int_field(&data, &status);
+                    if (status == READ_SUCCESS) tempint--;
+                    mesh->boundary[ib].type = TAILWATER;
+                    mesh->boundary[ib].bc_series = tempint;
+                }
+                break;
+            case CARD_DIS:
+                tempint = read_int_field(&data,&status);
+                if (tempint<1) throw_error("Boundary IDs need to lie between 1 and NCORND <ncorners>, inclusive");
+                if (status==READ_SUCCESS){
+                    int ib = tempint-1;
+                    mesh->boundary[ib].str = ib + SHIFT_EDGESTRING_IDS; /* Numbering starting 0 for storage. 1 will be added while writing output. */
+                    tempint = read_int_field(&data, &status);
+                    if (status == READ_SUCCESS) tempint--;
+                    mesh->boundary[ib].type = DISCHARGE;
+                    mesh->boundary[ib].bc_series = tempint;
+                }
+                break;
             case CARD_NO:
 #ifdef _DEBUG
                 // if (DEBUG) printf("\nNo card in this line!");
@@ -223,8 +291,89 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
         }
     }
 
+    for (imesh=0; imesh<*nummeshes; imesh++){
+         mesh = &((*mesh_ptr)[imesh]);
+         for (i=0; i<mesh->nboundaries; i++){
+             mesh->boundary[i].bc_value = mesh->series[mesh->boundary[i].bc_series];
+         }
+    }
 
 
-    printf("\n\n\n\nReached EOF\n\n\n\n");
+
+    /* Reading input file for taking in all the remaining data. */
+    rewind(infile);
+    imesh = -1;
+    mesh = NULL;
+    iscommon = 0;
+    while (iscommon!=1){ /* No need to check till EOF since we took care of that in the beginning of the file. */
+        fgets(line, MAXLINE, infile);
+        data = line;
+        if (parse_card(&data)==CARD_COMMON && parse_card(&data)==CARD_START) iscommon++;
+    }
+    while (iscommon!=1){ /* No need to check till EOF since we took care of that in the beginning of the file. */
+        fgets(line, MAXLINE, infile);
+        data = line;
+        switch (parse_card(&data)){
+            case CARD_TRN:
+                tempint = read_int_field(&data, &status);
+                if (tempint!=0 && tempint !=1) throw_error("Only 0 or 1 allowed for transport card TRN");
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].trn = tempint;
+            case CARD_TEM:
+                tempint = read_int_field(&data, &status);
+                if (tempint!=0 && tempint !=1) throw_error("Only 0 or 1 allowed for timestepping card TEM");
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].tem = tempint;
+            case CARD_NTL:
+                tempdouble = read_dbl_field(&data, &status);
+                if (tempdouble<=0. || tempdouble>1.) throw_error("0 < Tolerance (NTL) < 1.");
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].ntl = tempdouble;
+            case CARD_ITL:
+                tempdouble = read_dbl_field(&data, &status);
+                if (tempdouble<=0. || tempdouble>1.) throw_error("0 < Tolerance (ITL) < 1.");
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].itl = tempdouble;
+            case CARD_NIT:
+                tempint = read_int_field(&data, &status);
+                if (tempint<1) throw_error("Number of nonlinear iterations, integer NIT >= 1 required.");
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].nit = tempint;
+            case CARD_MIT:
+                tempint = read_int_field(&data, &status);
+                if (tempint<1) throw_error("Number of solver iterations, integer MIT >= 1 required.");
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].mit = tempint;
+            case CARD_TSTART:
+                tempdouble = read_dbl_field(&data, &status);
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].t0 = tempdouble;
+            case CARD_TEND:
+                tempdouble = read_dbl_field(&data, &status);
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].tf = tempdouble;
+            case CARD_DT:
+                tempdouble = read_dbl_field(&data, &status);
+                if (tempdouble<=0.0) throw_error("Time step > 0 required.");
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].dt = tempdouble;
+            case CARD_AWRITE:
+                tempdouble = read_dbl_field(&data, &status);
+                if (tempdouble<=0.0) throw_error("Result-writing interval > 0 required.");
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].awrite = tempdouble;
+            case CARD_MNG:
+                tempdouble = read_dbl_field(&data, &status);
+                if (tempdouble<0.0) throw_error("Manning's Friction (MNG) >= 0  required.");
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].mng = tempdouble;
+            case CARD_COMMON:
+                if (parse_card(&data)==CARD_END) iscommon++;
+                break;
+                default:
+                break;
+        }
+    }
+
     fclose(infile);
 }

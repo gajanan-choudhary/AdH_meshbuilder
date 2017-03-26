@@ -48,8 +48,8 @@ int main(/*int argc, char *argv[]*/){
     if (DEBUG) printf("\n\nEntering write_mesh_file()\n\n");
     write_mesh_file(&(mesh[i]));
 
-//    if (DEBUG) printf("\n\nEntering write_bc_file()\n\n");
-//    write_bc_file(&(mesh[i]));
+    if (DEBUG) printf("\n\nEntering write_bc_file()\n\n");
+    write_bc_file(&(mesh[i]));
 
     if (DEBUG) printf("\n\nEntering write_hotstart_file()\n\n");
     write_hotstart_file(&(mesh[i]));

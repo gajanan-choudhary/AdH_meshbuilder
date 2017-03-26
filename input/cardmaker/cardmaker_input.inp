@@ -31,6 +31,7 @@ DIS
 OTW    
 // Transport
 TRN    
+NBTRN  
 DF     
 TRT    
 CN     
@@ -49,3 +50,4 @@ END
 COMMON 
 NO     
 FOUT   
+MNG    

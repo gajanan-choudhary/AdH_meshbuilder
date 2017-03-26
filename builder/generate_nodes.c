@@ -1,6 +1,6 @@
 #include "global_header.h"
 
-static int DEBUG = ON;
+static int DEBUG = OFF;
 
 void generate_nodes(MESH *mesh){
     int i, j;

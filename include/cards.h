@@ -38,6 +38,7 @@ typedef enum {
     CARD_OTW     =          15380,
     // Transport,
     CARD_TRN     =           9249,
+    CARD_NBTRN   =        6252363,
     CARD_DF      =            133,
     CARD_TRT     =          13305,
     CARD_CN      =            340,
@@ -55,7 +56,8 @@ typedef enum {
     CARD_END     =           2370,
     CARD_COMMON  =      161074942,
     CARD_NO      =            377,
-    CARD_FOUT    =         347833
+    CARD_FOUT    =         347833,
+    CARD_MNG     =           4406
 } CARD;
 
 #endif
