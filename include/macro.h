@@ -98,15 +98,15 @@
 #define ELEM1D_LENGTH(e) PROJECTED_DISTANCE(e.coord[0].x, e.coord[0].y, e.coord[1].x, e.coord[1].y);
 #define LENGTH(xyz, n1, n2) PROJECTED_DISTANCE(xyz[n1].x, xyz[n1].y, xyz[n2].x, xyz[n2].y);
 
-//#define ELEM1D_LENGTH(e) sqrt((e.coord[0].x-e.coord[1].x)*(e.coord[0].x-e.coord[1].x) + (e.coord[0].y-e.coord[1].y)*(e.coord[0].y-e.coord[1].y));
-//#define LENGTH(x, n1, n2) sqrt((xyz[n1].x-xyz[n2].x)*(xyz[n1].x-xyz[n2].x) + (xyz[n1].y-xyz[n2].y)*(xyz[n1].y-xyz[n2].y));
+// #define ELEM1D_LENGTH(e) sqrt((e.coord[0].x-e.coord[1].x)*(e.coord[0].x-e.coord[1].x) + (e.coord[0].y-e.coord[1].y)*(e.coord[0].y-e.coord[1].y));
+// #define LENGTH(x, n1, n2) sqrt((xyz[n1].x-xyz[n2].x)*(xyz[n1].x-xyz[n2].x) + (xyz[n1].y-xyz[n2].y)*(xyz[n1].y-xyz[n2].y));
 
-#define ELEM1D_STORE_NODE_COORDS(e, coord) \
-    e.coord[0].x = coord[e.nodes[0]].x; \
-    e.coord[0].y = coord[e.nodes[0]].y; \
+#define ELEM1D_STORE_NODE_COORDS(e, xyz) \
+    e.coord[0].x = xyz[e.nodes[0]].x; \
+    e.coord[0].y = xyz[e.nodes[0]].y; \
                                         \
-    e.coord[1].x = coord[e.nodes[1]].x; \
-    e.coord[1].y = coord[e.nodes[1]].y;
+    e.coord[1].x = xyz[e.nodes[1]].x; \
+    e.coord[1].y = xyz[e.nodes[1]].y;
 
 #define CREATE_ELEM1D(e, xyz, node0, node1) \
     e.nodes[0] = node0; \
@@ -117,18 +117,18 @@
 /******************************************************************************************************************************************************************************************************/
 // Shape Function macros
 
-#define EVAL_SHP_FNCTN_BASIC(ksi, eta, p1, p2, p3, p4)  (p1*(1-ksi)*(1-eta) + p2*(1-ksi)*(1+eta) + p3*(1+ksi)*(1+eta) + p4*(1+ksi)*(1-eta))/4.0;
+#define EVAL_SHP_FNCTN_BASIC(ksi, eta, p1, p2, p3, p4)  (p1*(1-ksi)*(1-eta) + p2*(1+ksi)*(1-eta) + p3*(1+ksi)*(1+eta) + p4*(1-ksi)*(1+eta))/4.0;
 
-#define EVAL_SHP_FNCTN(ksi, eta, values)  (values[0]*(1-ksi)*(1-eta) + values[1]*(1-ksi)*(1+eta) + values[2]*(1+ksi)*(1+eta) + values[3]*(1+ksi)*(1-eta))/4.0;
+#define EVAL_SHP_FNCTN(ksi, eta, values)  (values[0]*(1-ksi)*(1-eta) + values[1]*(1+ksi)*(1-eta) + values[2]*(1+ksi)*(1+eta) + values[3]*(1-ksi)*(1+eta))/4.0;
 
 #define VECT2D_EVAL_SHP_FNCTN(ans, ksi, eta, corners) \
-    ans.x = (corners[0].x*(1-ksi)*(1-eta) + corners[1].x*(1-ksi)*(1+eta) + corners[2].x*(1+ksi)*(1+eta) + corners[3].x*(1+ksi)*(1-eta))/4.0; \
-    ans.y = (corners[0].y*(1-ksi)*(1-eta) + corners[1].y*(1-ksi)*(1+eta) + corners[2].y*(1+ksi)*(1+eta) + corners[3].y*(1+ksi)*(1-eta))/4.0;
+    ans.x = (corners[0].x*(1-ksi)*(1-eta) + corners[1].x*(1+ksi)*(1-eta) + corners[2].x*(1+ksi)*(1+eta) + corners[3].x*(1-ksi)*(1+eta))/4.0; \
+    ans.y = (corners[0].y*(1-ksi)*(1-eta) + corners[1].y*(1+ksi)*(1-eta) + corners[2].y*(1+ksi)*(1+eta) + corners[3].y*(1-ksi)*(1+eta))/4.0;
 
 #define VECT3D_EVAL_SHP_FNCTN(ans, ksi, eta, corners) \
-    ans.x = (corners[0].x*(1-ksi)*(1-eta) + corners[1].x*(1-ksi)*(1+eta) + corners[2].x*(1+ksi)*(1+eta) + corners[3].x*(1+ksi)*(1-eta))/4.0; \
-    ans.y = (corners[0].y*(1-ksi)*(1-eta) + corners[1].y*(1-ksi)*(1+eta) + corners[2].y*(1+ksi)*(1+eta) + corners[3].y*(1+ksi)*(1-eta))/4.0; \
-    ans.z = (corners[0].z*(1-ksi)*(1-eta) + corners[1].z*(1-ksi)*(1+eta) + corners[2].z*(1+ksi)*(1+eta) + corners[3].z*(1+ksi)*(1-eta))/4.0;
+    ans.x = (corners[0].x*(1-ksi)*(1-eta) + corners[1].x*(1+ksi)*(1-eta) + corners[2].x*(1+ksi)*(1+eta) + corners[3].x*(1-ksi)*(1+eta))/4.0; \
+    ans.y = (corners[0].y*(1-ksi)*(1-eta) + corners[1].y*(1+ksi)*(1-eta) + corners[2].y*(1+ksi)*(1+eta) + corners[3].y*(1-ksi)*(1+eta))/4.0; \
+    ans.z = (corners[0].z*(1-ksi)*(1-eta) + corners[1].z*(1+ksi)*(1-eta) + corners[2].z*(1+ksi)*(1+eta) + corners[3].z*(1-ksi)*(1+eta))/4.0;
 
 /******************************************************************************************************************************************************************************************************/
 #endif

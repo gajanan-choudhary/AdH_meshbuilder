@@ -215,7 +215,7 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                     int ib = tempint-1;
                     for (i=0; i<NDONSEG; i++){
                         tempint = read_int_field(&data, &status);
-                        if (status == READ_SUCCESS) mesh->boundary[ib].nodes[i] = tempint;
+                        if (status == READ_SUCCESS) mesh->boundary[ib].nodes[i] = tempint-1;
                     }
                     if (DEBUG) printf("\nmesh->boundary[%i].nodes = (% 2i, % 2i)", ib+1,
                                    mesh->boundary[ib].nodes[0], mesh->boundary[ib].nodes[1]);

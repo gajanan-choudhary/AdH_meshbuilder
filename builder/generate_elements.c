@@ -1,6 +1,6 @@
 #include "global_header.h"
 
-static int DEBUG = ON;
+static int DEBUG = OFF;
 
 void generate_elements(MESH *mesh){
     int i, j;
@@ -57,12 +57,94 @@ void generate_elements(MESH *mesh){
         }
     }
     assert(count==mesh->nelems2d);
+
+
+
+    count=0;
+    ELEM1D *boundary = mesh->boundary;
+    ELEM1D *elem1d = mesh->elem1d;
+    for (i=0; i<mesh->nboundaries; i++){
+        int nedges = NO, nodegap = NO, nodestart = NO;
+        switch (boundary[i].nodes[0]){
+            case 0:
+                nodestart = 0;
+                if (boundary[i].nodes[1] == 1){
+                    nodegap = 1;
+                    nedges  = mesh->nrows-1;
+                }
+                else if (boundary[i].nodes[1] == 3){
+                    nodegap = mesh->nrows;
+                    nedges  = mesh->ncols-1;
+                }
+                break;
+            case 1:
+                nodestart = mesh->nrows-1;
+                if (boundary[i].nodes[1] == 2){
+                    nodegap = mesh->nrows;
+                    nedges  = mesh->ncols-1;
+                }
+                else if (boundary[i].nodes[1] == 0){
+                    nodegap = -1;
+                    nedges  = mesh->nrows-1;
+                }
+                break;
+            case 2:
+                nodestart = mesh->nnodes-1;
+                if (boundary[i].nodes[1] == 3){
+                    nodegap = -1;
+                    nedges  = mesh->nrows-1;
+                }
+                else if (boundary[i].nodes[1] == 1){
+                    nodegap = -mesh->nrows;
+                    nedges  = mesh->ncols-1;
+                }
+                break;
+            case 3:
+                nodestart = mesh->nnodes-mesh->nrows;
+                if (boundary[i].nodes[1] == 0){
+                    nodegap = -mesh->nrows;
+                    nedges  = mesh->ncols-1;
+                }
+                else if (boundary[i].nodes[1] == 2){
+                    nodegap = 1;
+                    nedges  = mesh->nrows-1;
+                }
+                break;
+        }
+#ifdef _DEBUG
+        if (DEBUG) {
+            printf("\nnode0 = %i, node1 = %i",boundary[i].nodes[0], boundary[i].nodes[1]);
+            printf("\nnodestart = %i, nodegap = %i, nedges = %i", nodestart, nodegap, nedges);
+        }
+#endif
+        for (j=0; j<nedges; j++){
+            int node0 = nodestart+j*nodegap;
+            int node1 = nodestart+(j+1)*nodegap;
+            CREATE_ELEM1D(elem1d[count], mesh->xyz, node0, node1);
+            elem1d[count].str = boundary[i].str;
+            elem1d[count].type = boundary[i].type;
+            elem1d[count].bc_series = boundary[i].bc_series;
+            elem1d[count].bc_value = boundary[i].bc_value;
+            count++;
+        }
+    }
+    assert(count==mesh->nelems1d);
+
+
+
 #ifdef _DEBUG
     if (DEBUG){
         printf("\n");
         for (i=0; i<mesh->nelems2d; i++){
             printf("\nE3T %10i %10i %10i %10i %10i % 23.14e", i+1,
                 elem2d[i].nodes[0]+1,elem2d[i].nodes[1]+1, elem2d[i].nodes[2]+1, 1, elem2d[i].area);
+        }
+    }
+    if (DEBUG){
+        printf("\n");
+        for (i=0; i<mesh->nelems1d; i++){
+            printf("\nEGS %10i %10i %10i % 23.14e", i+1,
+                elem1d[i].nodes[0]+1,elem1d[i].nodes[1]+1, elem1d[i].length);
         }
     }
 #endif

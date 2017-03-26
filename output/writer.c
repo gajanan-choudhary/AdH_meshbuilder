@@ -131,9 +131,9 @@ void write_bc_file(MESH *mesh){
     }
 
     fprintf(outfile,"\n\n#Edge list below:\n");
-    //for (i=0; i<mesh->nelems1d; i++){
-    //    fprintf(outfile,"EGS %10i %10i %10i\n", elem1d[i].nodes[0], elem1d[i].nodes[1], i+1);
-    //}
+    for (i=0; i<mesh->nelems1d; i++){
+        fprintf(outfile,"EGS %10i %10i %10i\n", elem1d[i].nodes[0]+1, elem1d[i].nodes[1]+1, elem1d[i].str+1);
+    }
 
     fprintf(outfile, "\nEND");
     fclose(outfile);
