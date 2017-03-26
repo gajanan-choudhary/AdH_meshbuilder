@@ -73,7 +73,7 @@ void write_bc_file(MESH *mesh){
     fprintf(outfile,"\nFR MNG     1  % 9.6E\n\n", mesh->mng);
 
     for (i=0; i<mesh->nseries; i++){
-        fprintf(outfile,"#\nSERIES BC  %i  2  0  0  0  0\n", i);
+        fprintf(outfile,"#\nSERIES BC  %i  2  0  0  0  0\n", i+1);
         fprintf(outfile,"    % 23.15E    % 23.15E\n", mesh->t0,   mesh->series[i]);
         fprintf(outfile,"    % 23.15E    % 23.15E\n", mesh->tf*5, mesh->series[i]);
     }
@@ -161,7 +161,7 @@ void write_hotstart_file(MESH *mesh){
     fprintf(outfile,"NAME IOH\n");
     fprintf(outfile,"TS 0 0\n");
     for (i=0; i<mesh->nnodes; i++){
-        fprintf(outfile,"    % 23.14e\n", (mesh->xyz[i].z - mesh->wse[i]));
+        fprintf(outfile,"    % 23.14e\n", (mesh->wse[i] - mesh->xyz[i].z));
     }
 
     fprintf(outfile, "ENDDS");

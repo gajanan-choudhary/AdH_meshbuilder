@@ -28,10 +28,10 @@ int read_int_field(char **outstr, int *status){
         }
         else{
 #ifdef _DEBUG
-            if(DEBUG) printf("\nError: Encountered a non-numeric character while reading the number.");
-            else throw_error("\nError: Encountered a non-numeric character while reading the number.");
+            if(DEBUG) printf("\nError: Encountered a non-numeric character while reading the integer.");
+            else throw_error("\nError: Encountered a non-numeric character while reading the integer.");
 #else
-            throw_error("\nError: Encountered a non-numeric character while reading the number.");
+            throw_error("\nError: Encountered a non-numeric character while reading the integer.");
 #endif
             *outstr = i;
             *status = READ_FAILURE;

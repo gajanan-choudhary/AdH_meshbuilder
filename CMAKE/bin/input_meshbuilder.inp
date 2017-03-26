@@ -69,10 +69,10 @@ COMMON START
 #TRN  0                                                        # Switch transport on/off
 #TEM  1                                                        # Optional, second order time stepping
 
-NTL  1.000E-08                                                # IP NTL
-ITL  1.000E-08                                                # IP ITL
-NIT  10                                                       # IP NIT
-MIT  100                                                      # IP MIT
+NTL   1.000E-08                                                # IP NTL
+ITL   1.000E-08                                                # IP ITL
+NIT   10                                                       # IP NIT
+MIT   100                                                      # IP MIT
 
 MNG     2.000E-03                                             # Manning's friction
 

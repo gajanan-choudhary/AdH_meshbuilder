@@ -310,7 +310,7 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
         data = line;
         if (parse_card(&data)==CARD_COMMON && parse_card(&data)==CARD_START) iscommon++;
     }
-    while (iscommon!=1){ /* No need to check till EOF since we took care of that in the beginning of the file. */
+    while (iscommon!=2){ /* No need to check till EOF since we took care of that in the beginning of the file. */
         fgets(line, MAXLINE, infile);
         data = line;
         switch (parse_card(&data)){
@@ -318,55 +318,66 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                 tempint = read_int_field(&data, &status);
                 if (tempint!=0 && tempint !=1) throw_error("Only 0 or 1 allowed for transport card TRN");
                 if (status==READ_SUCCESS)
-                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].trn = tempint;
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].trn = tempint;
+                break;
             case CARD_TEM:
                 tempint = read_int_field(&data, &status);
                 if (tempint!=0 && tempint !=1) throw_error("Only 0 or 1 allowed for timestepping card TEM");
                 if (status==READ_SUCCESS)
-                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].tem = tempint;
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].tem = tempint;
+                break;
             case CARD_NTL:
                 tempdouble = read_dbl_field(&data, &status);
                 if (tempdouble<=0. || tempdouble>1.) throw_error("0 < Tolerance (NTL) < 1.");
                 if (status==READ_SUCCESS)
-                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].ntl = tempdouble;
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].ntl = tempdouble;
+                break;
             case CARD_ITL:
                 tempdouble = read_dbl_field(&data, &status);
                 if (tempdouble<=0. || tempdouble>1.) throw_error("0 < Tolerance (ITL) < 1.");
                 if (status==READ_SUCCESS)
-                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].itl = tempdouble;
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].itl = tempdouble;
+                break;
             case CARD_NIT:
                 tempint = read_int_field(&data, &status);
                 if (tempint<1) throw_error("Number of nonlinear iterations, integer NIT >= 1 required.");
                 if (status==READ_SUCCESS)
-                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].nit = tempint;
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].nit = tempint;
+                break;
             case CARD_MIT:
                 tempint = read_int_field(&data, &status);
                 if (tempint<1) throw_error("Number of solver iterations, integer MIT >= 1 required.");
                 if (status==READ_SUCCESS)
-                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].mit = tempint;
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].mit = tempint;
+                break;
             case CARD_TSTART:
                 tempdouble = read_dbl_field(&data, &status);
                 if (status==READ_SUCCESS)
-                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].t0 = tempdouble;
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].t0 = tempdouble;
+                break;
             case CARD_TEND:
                 tempdouble = read_dbl_field(&data, &status);
                 if (status==READ_SUCCESS)
-                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].tf = tempdouble;
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].tf = tempdouble;
+                break;
             case CARD_DT:
                 tempdouble = read_dbl_field(&data, &status);
                 if (tempdouble<=0.0) throw_error("Time step > 0 required.");
                 if (status==READ_SUCCESS)
-                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].dt = tempdouble;
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].dt = tempdouble;
+                break;
             case CARD_AWRITE:
                 tempdouble = read_dbl_field(&data, &status);
                 if (tempdouble<=0.0) throw_error("Result-writing interval > 0 required.");
                 if (status==READ_SUCCESS)
-                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].awrite = tempdouble;
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].awrite = tempdouble;
+                break;
             case CARD_MNG:
                 tempdouble = read_dbl_field(&data, &status);
                 if (tempdouble<0.0) throw_error("Manning's Friction (MNG) >= 0  required.");
                 if (status==READ_SUCCESS)
-                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[i].mng = tempdouble;
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].mng = tempdouble;
+                break;
             case CARD_COMMON:
                 if (parse_card(&data)==CARD_END) iscommon++;
                 break;

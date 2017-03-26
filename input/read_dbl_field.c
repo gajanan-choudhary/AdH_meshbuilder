@@ -38,10 +38,11 @@ double read_dbl_field(char **outstr, int *status){
         }
         else{
 #ifdef _DEBUG
-            if(DEBUG) printf("\nError: Encountered a non-numeric character while reading the number.");
-            else throw_error("\nError: Encountered a non-numeric character while reading the number.");
+            printf("\n%s", i);
+            if(DEBUG) printf("\nError: Encountered a non-numeric character while reading the double.");
+            else throw_error("\nError: Encountered a non-numeric character while reading the double.");
 #else
-            throw_error("\nError: Encountered a non-numeric character while reading the number.");
+            throw_error("\nError: Encountered a non-numeric character while reading the double.");
 #endif
             *outstr = i;
             *status = READ_FAILURE;
