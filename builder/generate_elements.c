@@ -42,13 +42,23 @@ void generate_elements(MESH *mesh){
 
     count=0;
     ELEM2D *elem2d = mesh->elem2d;
+#ifdef _COLUMNFIRST
     for (i=0; i<mesh->ncols-1; i++){
         for (j=0; j<mesh->nrows-1; j++){ /* Column-first numbering */
-            /* Note the indices of nodes[] below! */
+            /* Note the tricky indices of nodes[] below! */
             nodes[0] = i*mesh->nrows+j;
             nodes[1] = nodes[0]+1;
             nodes[3] = nodes[0]+mesh->nrows;
             nodes[2] = nodes[3]+1;
+#else
+    for (j=0; j<mesh->nrows-1; j++){
+        for (i=0; i<mesh->ncols-1; i++){ /* Row-first numbering */
+            /* Note the tricky indices of nodes[] below! */
+            nodes[0] = i+j*mesh->ncols;
+            nodes[1] = nodes[0]+1;
+            nodes[3] = nodes[0]+mesh->ncols;
+            nodes[2] = nodes[3]+1;
+#endif
             
             CREATE_ELEM2D(elem2d[count],mesh->xyz,nodes[index[3]], nodes[index[0]], nodes[index[1]]);
             count++;
@@ -65,52 +75,101 @@ void generate_elements(MESH *mesh){
     ELEM1D *elem1d = mesh->elem1d;
     for (i=0; i<mesh->nboundaries; i++){
         int nedges = NO, nodegap = NO, nodestart = NO;
+#ifdef _COLUMNFIRST
+        switch (boundary[i].nodes[0]){
+            case 0:
+                nodestart = 0;
+                if (boundary[i].nodes[1] == 1){
+                    nodegap = mesh->nrows;
+                    nedges  = mesh->ncols-1;
+                }
+                else if (boundary[i].nodes[1] == 3){
+                    nodegap = 1;
+                    nedges  = mesh->nrows-1;
+                }
+                break;
+            case 1:
+                nodestart = mesh->nnodes-mesh->nrows;
+                if (boundary[i].nodes[1] == 2){
+                    nodegap = 1;
+                    nedges  = mesh->nrows-1;
+                }
+                else if (boundary[i].nodes[1] == 0){
+                    nodegap = -mesh->nrows;
+                    nedges  = mesh->ncols-1;
+                }
+                break;
+            case 2:
+                nodestart = mesh->nnodes-1;
+                if (boundary[i].nodes[1] == 3){
+                    nodegap = -mesh->nrows;
+                    nedges  = mesh->ncols-1;
+                }
+                else if (boundary[i].nodes[1] == 1){
+                    nodegap = -1;
+                    nedges  = mesh->nrows-1;
+                }
+                break;
+            case 3:
+                nodestart = mesh->nrows-1;
+                if (boundary[i].nodes[1] == 0){
+                    nodegap = -1;
+                    nedges  = mesh->nrows-1;
+                }
+                else if (boundary[i].nodes[1] == 2){
+                    nodegap = mesh->nrows;
+                    nedges  = mesh->ncols-1;
+                }
+                break;
+        }
+#else
         switch (boundary[i].nodes[0]){
             case 0:
                 nodestart = 0;
                 if (boundary[i].nodes[1] == 1){
                     nodegap = 1;
-                    nedges  = mesh->nrows-1;
+                    nedges  = mesh->ncols-1;
                 }
                 else if (boundary[i].nodes[1] == 3){
-                    nodegap = mesh->nrows;
-                    nedges  = mesh->ncols-1;
+                    nodegap = mesh->ncols;
+                    nedges  = mesh->nrows-1;
                 }
                 break;
             case 1:
-                nodestart = mesh->nrows-1;
+                nodestart = mesh->ncols-1;
                 if (boundary[i].nodes[1] == 2){
-                    nodegap = mesh->nrows;
-                    nedges  = mesh->ncols-1;
+                    nodegap = mesh->ncols;
+                    nedges  = mesh->nrows-1;
                 }
                 else if (boundary[i].nodes[1] == 0){
                     nodegap = -1;
-                    nedges  = mesh->nrows-1;
+                    nedges  = mesh->ncols-1;
                 }
                 break;
             case 2:
                 nodestart = mesh->nnodes-1;
                 if (boundary[i].nodes[1] == 3){
                     nodegap = -1;
-                    nedges  = mesh->nrows-1;
+                    nedges  = mesh->ncols-1;
                 }
                 else if (boundary[i].nodes[1] == 1){
-                    nodegap = -mesh->nrows;
-                    nedges  = mesh->ncols-1;
+                    nodegap = -mesh->ncols;
+                    nedges  = mesh->nrows-1;
                 }
                 break;
             case 3:
-                nodestart = mesh->nnodes-mesh->nrows;
+                nodestart = mesh->nnodes-mesh->ncols;
                 if (boundary[i].nodes[1] == 0){
-                    nodegap = -mesh->nrows;
-                    nedges  = mesh->ncols-1;
+                    nodegap = -mesh->ncols;
+                    nedges  = mesh->nrows-1;
                 }
                 else if (boundary[i].nodes[1] == 2){
                     nodegap = 1;
-                    nedges  = mesh->nrows-1;
+                    nedges  = mesh->ncols-1;
                 }
                 break;
         }
+#endif
 #ifdef _DEBUG
         if (DEBUG) {
             printf("\nnode0 = %i, node1 = %i",boundary[i].nodes[0], boundary[i].nodes[1]);

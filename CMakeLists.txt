@@ -21,6 +21,12 @@ elseif (BUILD_DEBUG_LEVEL EQUAL 2)
     add_definitions(-D_DEBUG -g -Wall -Wextra)
 endif()
 
+option(USE_COLUMNFIRST "Node numbering is column first, so nodes on boundary 1-4 are numbered first" ON)
+if (USE_COLUMNFIRST)
+    message("Using column-first numbering by adding definition _COLUMNFIRST")
+    add_definitions(-D_COLUMNFIRST)
+endif (USE_COLUMNFIRST)
+
 #####################################
 # EXE LINKER FLAGS
 set(CMAKE_EXE_LINKER_FLAGS "-lm")

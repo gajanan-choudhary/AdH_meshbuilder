@@ -55,6 +55,9 @@ int main(/*int argc, char *argv[]*/){
     write_hotstart_file(&(mesh[i]));
     }
 
+    if (DEBUG) printf("\n\nEntering write_superfile()\n\n");
+    write_superfile(mesh, nmeshes);
+
     if (DEBUG) printf("\n\nEntering mesh_free()\n\n");
     mesh_free(&mesh, nmeshes);
     printf("\nProject run successful. Exiting...\n\n");

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+columnfirstonoff="OFF";
 
 meshbuilder_root_path="/workspace/gajanan/adh/shiftx/mesh_builder_adh"
 #########################################################################
@@ -26,7 +27,7 @@ if [ ! -d $meshbuilder_root_path ]; then
 fi
 cleanstatus=-1
 runstatus=-1
-cmake_args=""
+cmake_args=" -DUSE_COLUMNFIRST=$columnfirstonoff"
 
 ####################################################################################################################
 checkpoint(){
@@ -107,7 +108,7 @@ if [ $cleanstatus -gt 0 ]; then
   shortecho
   echo "Cleaning previous build, if any..."
   echo "     - Deleting folders"
-  rm -r bin/meshbuilder bin/runoutput.txt bin/*.3dm bin/*.bc bin/*.hot CMakeFiles main structs builder lib input output  >& /dev/null
+  rm -r bin/meshbuilder bin/runoutput.txt bin/*.3dm bin/*.bc bin/*.hot bin/superfile.in CMakeFiles main structs builder lib input output  >& /dev/null
   echo "     - Deleting remaining files"
   rm Makefile cmake_install.cmake CMakeCache.txt >& /dev/null
   echo "     - Cleaning complete"
