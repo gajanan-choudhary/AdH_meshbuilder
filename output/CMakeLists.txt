@@ -7,3 +7,5 @@ list(APPEND output_srcs
 list(REMOVE_DUPLICATES output_srcs)
 
 add_library("output" STATIC EXCLUDE_FROM_ALL ${output_srcs})
+
+target_link_libraries(output structs)

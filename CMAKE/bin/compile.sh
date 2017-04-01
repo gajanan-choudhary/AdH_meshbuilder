@@ -1,6 +1,6 @@
 #!/bin/bash
 
-columnfirstonoff="OFF";
+columnfirstonoff="ON";
 
 meshbuilder_root_path="/workspace/gajanan/adh/shiftx/mesh_builder_adh"
 #########################################################################

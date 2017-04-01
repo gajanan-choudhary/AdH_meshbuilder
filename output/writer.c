@@ -49,7 +49,7 @@ void write_bc_file(MESH *mesh){
     assert(outfile!=NULL);
 
     fprintf(outfile,"OP SW2\n");
-    if (mesh->trn!=NO) fprintf(outfile,"OP TRN  %i\n", mesh->trn);
+    fprintf(outfile,"OP TRN  %i\n", mesh->trn);
     fprintf(outfile,"OP BLK  1\n");
     fprintf(outfile,"OP INC  40\n");
     fprintf(outfile,"OP PRE  1\n");
@@ -64,13 +64,14 @@ void write_bc_file(MESH *mesh){
 
     fprintf(outfile,"\nMTS        1  1\n");
     fprintf(outfile,"MP ML      1  0\n");
-    fprintf(outfile,"MP SRT     1  1.0\n");
+    fprintf(outfile,"MP SRT     1  100\n");
 
-    fprintf(outfile,"\nMP EVS     1  0.0  0.0  0.0\n");
+    fprintf(outfile,"\nMP EVS     1  0.01  0.01  0.01\n");
     fprintf(outfile,"MP MUC     1.0\n");
     fprintf(outfile,"MP MU      0.0\n");
     fprintf(outfile,"MP RHO     990\n");
     fprintf(outfile,"MP G       9.81\n");
+    if (mesh->dtl>0.0) fprintf(outfile, "MP DTL     %23.15E",mesh->dtl);
 
     fprintf(outfile,"\nFR MNG     1  % 9.6E\n\n", mesh->mng);
 
@@ -162,7 +163,9 @@ void write_hotstart_file(MESH *mesh){
     fprintf(outfile,"NAME IOH\n");
     fprintf(outfile,"TS 0 0\n");
     for (i=0; i<mesh->nnodes; i++){
-        fprintf(outfile,"    % 23.15E\n", (mesh->wse[i] - mesh->xyz[i].z));
+        double depth = (mesh->wse[i] - mesh->xyz[i].z);
+        depth = max2(-SMALL, depth);
+        fprintf(outfile,"    % 20.15f\n", depth);
     }
 
     fprintf(outfile, "ENDDS");
@@ -192,7 +195,7 @@ void write_superfile(MESH *mesh, int nmeshes){
     }
     for (i=0; i<nsupmod; i++) nsubmod[i]++;
     
-    int nsuperinterfaces=0;
+    //int nsuperinterfaces=0;
     for (i=0; i<nsupmod; i++){
         fprintf(outfile, "################################################################# SUPERMODEL %i", i+1);
         fprintf(outfile, "\nSMODEL  %i", nsubmod[i]);
@@ -205,13 +208,14 @@ void write_superfile(MESH *mesh, int nmeshes){
         }
         int nsubinterfaces=0;
         for (j=0; j<nmeshes; j++){
+            if (mesh[j].supID!=i) continue;
             for (k=0; k<mesh[j].nboundaries; k++){
                 if(mesh[j].boundary[k].type == STRONG_INTERFACE){
                     nsubinterfaces++;
                 }
-                if(mesh[j].boundary[k].type == WEAK_INTERFACE){
-                    nsuperinterfaces++;
-                }
+                //if(mesh[j].boundary[k].type == WEAK_INTERFACE){
+                //    nsuperinterfaces++;
+                //}
             }
         }
         if (nsubinterfaces%2!=0) throw_error("There have to be an even number of HY INT cards in the input file.");
@@ -230,55 +234,64 @@ void write_superfile(MESH *mesh, int nmeshes){
         fprintf(outfile, "\n    IP MIT  %3i", mesh[j].mit);
         /* Note : stopped using the value of j now. */
 
-        fprintf(outfile, "\n\n    NUMIFC  %i", nsubinterfaces);
-        for (j=0; j<nmeshes; j++){
-            for (k=0; k<mesh[j].nboundaries; k++){
-                if(mesh[j].boundary[k].type == STRONG_INTERFACE){
-                    ELEM1D *b1 = &(mesh[j].boundary[k]);
-                    int /* othermodelfound = NO,*/ jj, kk;
-                    for (jj=j+1; jj<nmeshes; jj++){
-                        for (kk=0; kk<mesh[jj].nboundaries; jj++){
-                            if (mesh[jj].boundary[kk].type == STRONG_INTERFACE){
-                                ELEM1D *b2 = &(mesh[jj].boundary[kk]);
-                                double dist1 = PROJECTED_DISTANCE(b1->coord[0].x, b1->coord[0].y, b2->coord[0].x, b2->coord[0].y);
-                                double dist2 = PROJECTED_DISTANCE(b1->coord[1].x, b1->coord[1].y, b2->coord[1].x, b2->coord[1].y);
-                                double dist3 = PROJECTED_DISTANCE(b1->coord[0].x, b1->coord[0].y, b2->coord[1].x, b2->coord[1].y);
-                                double dist4 = PROJECTED_DISTANCE(b1->coord[1].x, b1->coord[1].y, b2->coord[0].x, b2->coord[0].y);
-                                if ((dist1<SMALL && dist2<SMALL) || (dist3<SMALL && dist4<SMALL)){
-                                    int nnodes1 = count_nodes(mesh[j].elem1d, mesh[j].nelems1d,  b1->str);
-                                    int nnodes2 = count_nodes(mesh[jj].elem1d, mesh[jj].nelems1d, b2->str);
-                                    if (DEBUG) printf("\nnnodes1 = %i, nnodes2 = %i\n", nnodes1, nnodes2);
-                                    if (nnodes1!=nnodes2) throw_error("Number of nodes along the interface should be equal on both the models which share it. Check the cards NROWS and NCOLS in the input file.");
-                                    fprintf(outfile, "\n    INTFCE  %i  %i  %i", mesh[j].subID+1, mesh[jj].subID+1, nnodes1);
-                                    fprintf(outfile, "    !  Interface between submodel %i and %i contains %i coupled node columns.", mesh[j].subID+1, mesh[jj].subID+1, nnodes1);
-                                    // othermodelfound=YES;
+        if (nsubinterfaces>0) {
+            fprintf(outfile, "\n\n    NUMIFC  %i", nsubinterfaces);
+            for (j=0; j<nmeshes; j++){
+                if (mesh[j].supID!=i) continue;
+                for (k=0; k<mesh[j].nboundaries; k++){
+                    if(mesh[j].boundary[k].type == STRONG_INTERFACE){
+                        ELEM1D *b1 = &(mesh[j].boundary[k]);
+                        int /* othermodelfound = NO,*/ jj, kk;
+                        for (jj=j+1; jj<nmeshes; jj++){
+                            for (kk=0; kk<mesh[jj].nboundaries; kk++){
+                                if (mesh[jj].boundary[kk].type == STRONG_INTERFACE){
+                                    ELEM1D *b2 = &(mesh[jj].boundary[kk]);
+                                    double dist1 = PROJECTED_DISTANCE(b1->coord[0].x, b1->coord[0].y, b2->coord[0].x, b2->coord[0].y);
+                                    double dist2 = PROJECTED_DISTANCE(b1->coord[1].x, b1->coord[1].y, b2->coord[1].x, b2->coord[1].y);
+                                    double dist3 = PROJECTED_DISTANCE(b1->coord[0].x, b1->coord[0].y, b2->coord[1].x, b2->coord[1].y);
+                                    double dist4 = PROJECTED_DISTANCE(b1->coord[1].x, b1->coord[1].y, b2->coord[0].x, b2->coord[0].y);
+                                    if ((dist1<SMALL && dist2<SMALL) || (dist3<SMALL && dist4<SMALL)){
+                                        int nnodes1 = count_nodes(mesh[j].elem1d, mesh[j].nelems1d,  b1->str);
+                                        int nnodes2 = count_nodes(mesh[jj].elem1d, mesh[jj].nelems1d, b2->str);
+#ifdef _DEBUG
+                                        if (DEBUG) {
+                                            printf("\ndist1 = %23.14e, dist2 = %23.14e\ndist3 = %23.14e, dist4 = %23.14e", dist1, dist2, dist3, dist4);
+                                            printf_elem1d(mesh[j].boundary, k);
+                                            printf_elem1d(mesh[jj].boundary, kk);
+                                            printf("\nnnodes1 = %i, nnodes2 = %i\n", nnodes1, nnodes2);
+                                        }
+#endif
+                                        if (nnodes1!=nnodes2) throw_error("Number of nodes along the interface should be equal on both the models which share it. Check the cards NROWS and NCOLS in the input file.");
+                                        fprintf(outfile, "\n    INTFCE  %i  %i  %i", mesh[j].subID+1, mesh[jj].subID+1, nnodes1);
+                                        fprintf(outfile, "    !  Interface between submodel %i and %i contains %i coupled node columns.", mesh[j].subID+1, mesh[jj].subID+1, nnodes1);
+                                        // othermodelfound=YES;
+                                    }
                                 }
                             }
                         }
+                        //if (othermodelfound==NO) throw_error("Please check the model node corners to make sure there are overlapping interface edges. Could not find the coupled model counterpart of at least one model.")
                     }
-                    //if (othermodelfound==NO) throw_error("Please check the model node corners to make sure there are overlapping interface edges. Could not find the coupled model counterpart of at least one model.")
                 }
             }
         }
-
         // fprintf(outfile, "");
         // fprintf(outfile, "");
         // fprintf(outfile, "");
         // fprintf(outfile, "");
         fprintf(outfile, "\n\n");
     }
-    if (nsuperinterfaces%2!=0) throw_error("There have to be an even number of HY EXT or HY CPL cards in the input file.");
-    nsuperinterfaces/=2;
-    if (nsuperinterfaces>0){
+    //if (nsuperinterfaces%2!=0) throw_error("There have to be an even number of HY EXT or HY CPL cards in the input file.");
+    //nsuperinterfaces/=2;
+    //if (nsuperinterfaces>0){
         fprintf(outfile, "\n\n################################################################# Superinterface data");
         for (j=0; j<nmeshes; j++){
             for (k=0; k<mesh[j].nboundaries; k++){
-                if(mesh[j].boundary[k].type == WEAK_INTERFACE){
+                if(mesh[j].boundary[k].type != STRONG_INTERFACE){
                     ELEM1D *b1 = &(mesh[j].boundary[k]);
                     int /* othermodelfound = NO,*/ jj, kk;
                     for (jj=j+1; jj<nmeshes; jj++){
-                        for (kk=0; kk<mesh[jj].nboundaries; jj++){
-                            if (mesh[jj].boundary[kk].type == WEAK_INTERFACE){
+                        for (kk=0; kk<mesh[jj].nboundaries; kk++){
+                            if (mesh[jj].boundary[kk].type != STRONG_INTERFACE){
                                 ELEM1D *b2 = &(mesh[jj].boundary[kk]);
                                 double dist1 = PROJECTED_DISTANCE(b1->coord[0].x, b1->coord[0].y, b2->coord[0].x, b2->coord[0].y);
                                 double dist2 = PROJECTED_DISTANCE(b1->coord[1].x, b1->coord[1].y, b2->coord[1].x, b2->coord[1].y);
@@ -288,12 +301,19 @@ void write_superfile(MESH *mesh, int nmeshes){
                                     int nedges1 = count_nodes(mesh[j].elem1d, mesh[j].nelems1d,  b1->str);
                                     int nedges2 = count_nodes(mesh[jj].elem1d, mesh[jj].nelems1d, b2->str);
                                     nedges1--; nedges2--; // #edges = #nodes-1 for 'open' interfaces
-                                    if (DEBUG) printf("\nnedges1 = %i, nedges2 = %i\n", nedges1, nedges2);
+#ifdef _DEBUG
+                                    if (DEBUG) {
+                                        printf("\ndist1 = %23.14e, dist2 = %23.14e\ndist3 = %23.14e, dist4 = %23.14e", dist1, dist2, dist3, dist4);
+                                        printf_elem1d(mesh[j].boundary, k);
+                                        printf_elem1d(mesh[jj].boundary, kk);
+                                        printf("\nnedges1 = %i, nedges2 = %i\n", nedges1, nedges2);
+                                    }
+#endif
                                     if (nedges1!=nedges2) throw_error("Number of nodes along the interface should be equal on both the models which share it. Check the cards NROWS and NCOLS in the input file.");
                                     fprintf(outfile, "\nSUPIFC  %i  %i", mesh[j].supID+1, mesh[jj].supID+1);
                                     fprintf(outfile, "    !  Interface between supermodels %i and %i", mesh[j].supID+1, mesh[jj].supID+1);
                                     fprintf(outfile, "\n    IFCSM  %i  %i  %i", mesh[j].subID+1, mesh[jj].subID+1, nedges1);
-                                    fprintf(outfile, "    !  Interface between supermodel %i, submodel %i and supermodel %i, submodel %i contains %i coupled node columns.",
+                                    fprintf(outfile, "    !  Interface between supermodel %i, submodel %i and supermodel %i, submodel %i contains %i coupled edge/face columns.",
                                                                            mesh[j].supID+1, mesh[j].subID+1, mesh[jj].supID+1, mesh[jj].subID+1, nedges1);
                                     // othermodelfound=YES;
                                 }
@@ -305,7 +325,7 @@ void write_superfile(MESH *mesh, int nmeshes){
             }
         }
 
-    }
+    //}
 
     free(nsubmod);
     fclose(outfile);

@@ -24,7 +24,7 @@ void mesh_defaults(MESH *mesh, int nmeshes){
         mesh[i].nboundaries = 0;
         mesh[i].nseries     = 0;
 
-        mesh[i].trn    = NO;
+        mesh[i].trn    = 0;
         mesh[i].tem    = NO;
         mesh[i].nit    = 20;
         mesh[i].mit    = 500;
@@ -35,7 +35,9 @@ void mesh_defaults(MESH *mesh, int nmeshes){
         mesh[i].tf     = 1.000E+04;
         mesh[i].dt     = 1.000E+02;
         mesh[i].awrite = 1.000E+02;
+        mesh[i].dtl    = 0.000E+00;
 
+        mesh[i].cornerwse   = NULL;
         mesh[i].wse         = NULL;
         mesh[i].series      = NULL;
         mesh[i].cornernodes = NULL;
@@ -60,6 +62,9 @@ void mesh_init(MESH *mesh){
     mesh->nelems2d = 2* (mesh->nrows-1)*(mesh->ncols-1);
     mesh->nelems1d = 2*((mesh->nrows-1)+(mesh->ncols-1));
     mesh->nboundaries = mesh->ncorners; /* Quadrilateral domain, by choice */
+
+    mesh->cornerwse = (double *) malloc(sizeof(double) * mesh->ncorners);
+    checkmem(mesh->cornerwse);
 
     mesh->wse = (double *) malloc(sizeof(double) * mesh->nnodes);
     checkmem(mesh->wse);
@@ -114,6 +119,7 @@ void mesh_free(MESH **mesh_ptr, int nmeshes){
     int i;
     for (i=0; i<nmeshes; i++){
         //free((*mesh_ptr)[i].name);
+        free((*mesh_ptr)[i].cornerwse);
         free((*mesh_ptr)[i].wse);
         free((*mesh_ptr)[i].series);
         free((*mesh_ptr)[i].cornernodes);

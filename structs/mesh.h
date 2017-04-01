@@ -19,9 +19,11 @@ typedef struct{
     double mng;               // Manning's friction value.
     double t0, tf, dt;        // Starting and ending times, and time step.
     double awrite;            // Used for creating SERIES AWRITE.
+    double dtl;               // Used for wetting and drying.
     /* Data expected to be common to all meshes above. Inefficient, I know, but futureproofing. */
 
-    double *wse;              // Initial condition for the water surface elevation, size = nnodes
+    double *cornerwse;        // Initial condition for the water surface elevation, size = NCORNERS
+    double *wse;              // Interpolated initial condition for the water surface elevation, size = nnodes
     double *series;           // Contains series values for BC's
 
     VECT3D *cornernodes;      // Corner nodes' co-ordinates, starting bottom left, going anticlockwise

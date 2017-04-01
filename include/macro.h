@@ -25,8 +25,10 @@
 #define VECT2D_MAG(vect) sqrt(VECT2D_DOT(vect,vect));
 #define VECT3D_MAG(vect) sqrt(VECT3D_DOT(vect,vect));
 
-#define PROJECTED_DISTANCE(x1,y1,x2,y2) sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
-#define PROJECTED_AREA(x1,y1,x2,y2,x3,y3) ((x1*y2+x2*y3+x3*y1)-(x2*y1+x3*y2+x1*y3))/2.0;
+#define PROJECTED_DISTANCE(x1,y1,x2,y2) sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))
+
+#define PROJECTED_AREA(x1,y1,x2,y2,x3,y3) ((x1*y2+x2*y3+x3*y1)-(x2*y1+x3*y2+x1*y3))/2.0
+
 #define TRIANGLE_AREA(xy,n1,n2,n3) ((xy[n1].x*xy[n2].y+xy[n2].x*xy[n3].y+xy[n3].x*xy[n1].y)-(xy[n2].x*xy[n1].y+xy[n3].x*xy[n2].y+xy[n1].x*xy[n3].y))/2.0;
 #define VECT2D_AREA(v1,v2)  VECT2D_CROSS(v1,v2)/2.0;
 

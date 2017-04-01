@@ -11,4 +11,6 @@ typedef struct{
     double bc_value;          // Value to be supplied
 } ELEM1D;
 
+void printf_elem1d(ELEM1D *elem1d, int id);
+
 #endif

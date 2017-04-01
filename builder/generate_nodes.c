@@ -19,13 +19,16 @@ void generate_nodes(MESH *mesh){
             ksi = -1.0 + 2.0*(double)i/(double)(mesh->ncols-1);
 #endif
             VECT3D_EVAL_SHP_FNCTN(mesh->xyz[count], ksi, eta, mesh->cornernodes);
+            mesh->wse[count] = EVAL_SHP_FNCTN(ksi,eta,mesh->cornerwse);
+
 #ifdef _DEBUG
-            if (DEBUG) printf("\nND  % 6i  % 23.14e % 23.14e % 23.14e", count+1,
-                           mesh->xyz[count].x, mesh->xyz[count].y, mesh->xyz[count].z);
+            if (DEBUG) printf("\nND |% 6i| % 23.14e | % 23.14e | % 23.14e | % 23.14e", count+1,
+                           mesh->xyz[count].x, mesh->xyz[count].y, mesh->xyz[count].z, mesh->wse[count]);
 #endif
             count++;
         }
 #ifdef _DEBUG
+            if (DEBUG) printf("\nFormat: | NodeID | X | Y | Bathymetry Surf. El. | Water Surf. El. |");
             if (DEBUG) printf("\n");
 #endif
     }

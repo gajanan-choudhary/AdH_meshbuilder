@@ -203,9 +203,9 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                 if (status==READ_SUCCESS){
                     tempint--;
                     tempdouble = read_dbl_field(&data, &status);
-                    if (status == READ_SUCCESS) mesh->wse[tempint] = tempdouble;
+                    if (status == READ_SUCCESS) mesh->cornerwse[tempint] = tempdouble;
                 }
-                if (DEBUG) printf("\nmesh->wse[%i] = % 23.16e", tempint+1, mesh->wse[tempint]);
+                if (DEBUG) printf("\nmesh->cornerwse[%i] = % 23.16e", tempint+1, mesh->cornerwse[tempint]);
                 break;
             case CARD_EGS:
                 tempint = read_int_field(&data,&status);
@@ -217,8 +217,10 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                         tempint = read_int_field(&data, &status);
                         if (status == READ_SUCCESS) mesh->boundary[ib].nodes[i] = tempint-1;
                     }
-                    if (DEBUG) printf("\nmesh->boundary[%i].nodes = (% 2i, % 2i)", ib+1,
-                                   mesh->boundary[ib].nodes[0], mesh->boundary[ib].nodes[1]);
+                    CREATE_ELEM1D(mesh->boundary[ib], mesh->cornernodes, mesh->boundary[ib].nodes[0], mesh->boundary[ib].nodes[1]);
+                    if (DEBUG) printf_elem1d(mesh->boundary, ib);
+                    // if (DEBUG) printf("\nmesh->boundary[%i].nodes = (% 2i, % 2i)", ib+1,
+                    //                mesh->boundary[ib].nodes[0], mesh->boundary[ib].nodes[1]);
                 }
                 break;
             case CARD_BC:
@@ -279,6 +281,11 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                     mesh->boundary[ib].type = DISCHARGE;
                     mesh->boundary[ib].bc_series = tempint;
                 }
+                break;
+            case CARD_DTL:
+                tempdouble = read_dbl_field(&data, &status);
+                if (status == READ_SUCCESS) mesh->dtl = tempdouble;
+                if (DEBUG) printf("\nmesh->dtl = % 23.16e", mesh->dtl);
                 break;
             case CARD_NO:
 #ifdef _DEBUG

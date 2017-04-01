@@ -3,6 +3,9 @@
 static int DEBUG = OFF;
 
 void generate_elements(MESH *mesh){
+    ELEM2D *elem2d = mesh->elem2d;
+    ELEM1D *boundary = mesh->boundary;
+    ELEM1D *elem1d = mesh->elem1d;
     int i, j;
     int count=0, refnode;
     int nodes[NCORNERS];
@@ -41,7 +44,6 @@ void generate_elements(MESH *mesh){
     }
 
     count=0;
-    ELEM2D *elem2d = mesh->elem2d;
 #ifdef _COLUMNFIRST
     for (i=0; i<mesh->ncols-1; i++){
         for (j=0; j<mesh->nrows-1; j++){ /* Column-first numbering */
@@ -71,8 +73,6 @@ void generate_elements(MESH *mesh){
 
 
     count=0;
-    ELEM1D *boundary = mesh->boundary;
-    ELEM1D *elem1d = mesh->elem1d;
     for (i=0; i<mesh->nboundaries; i++){
         int nedges = NO, nodegap = NO, nodestart = NO;
 #ifdef _COLUMNFIRST
@@ -207,4 +207,5 @@ void generate_elements(MESH *mesh){
         }
     }
 #endif
+
 }
