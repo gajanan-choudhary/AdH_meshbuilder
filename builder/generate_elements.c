@@ -1,6 +1,6 @@
 #include "global_header.h"
 
-static int DEBUG = OFF;
+static int DEBUG = ON;
 
 void generate_elements(MESH *mesh){
     ELEM2D *elem2d = mesh->elem2d;
@@ -18,14 +18,17 @@ void generate_elements(MESH *mesh){
 #endif
     for (i=0; i<NCORNERS; i++) {
 #ifdef _DEBUG
-         if (DEBUG) printf("\nNode %i (% 23.14e, % 23.14e) distance = % 23.14e", i,
-             mesh->cornernodes[i].x, mesh->cornernodes[i].y, (mesh->cornernodes[i].x-leftx));
+         if (DEBUG) printf("\nNode %i (% 23.14e, % 23.14e) distance = % 23.14e, SMALL = % 23.14e", i,
+             mesh->cornernodes[i].x, mesh->cornernodes[i].y, (mesh->cornernodes[i].x-leftx), SMALL);
 #endif
-        if ( (abs(mesh->cornernodes[i].x-leftx)) < SMALL) {
+        if ( (fabs(mesh->cornernodes[i].x-leftx)) < SMALL) {
            index[count] = i;
            count++;
         }
     }
+#ifdef _DEBUG
+    if (DEBUG) printf("\ncount = %i", count);
+#endif
     assert(count>0); /* Otherwise, we need to rewrite the if condition */
     assert(count<3); /* Otherwise, there are at least 3 collinear points! */
     if (count == 1){

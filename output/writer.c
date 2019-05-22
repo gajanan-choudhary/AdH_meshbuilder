@@ -1,5 +1,5 @@
 #include "global_header.h"
-
+#define PI 3.14159265358979323846264338
 static int DEBUG = OFF;
 
 /*****************************************************************************************/
@@ -54,6 +54,7 @@ void write_bc_file(MESH *mesh){
     fprintf(outfile,"OP INC  40\n");
     fprintf(outfile,"OP PRE  1\n");
     if (mesh->tem!=NO) fprintf(outfile,"OP TEM  %i\n", mesh->tem);
+    if (mesh->tpg>=0.0) fprintf(outfile,"OP TPG  %i\n", mesh->tpg);
 
     fprintf(outfile,"\n#Screen output\nSOUT ALL\n");
 
@@ -66,7 +67,7 @@ void write_bc_file(MESH *mesh){
     fprintf(outfile,"MP ML      1  0\n");
     fprintf(outfile,"MP SRT     1  100\n");
 
-    fprintf(outfile,"\nMP EVS     1  0.01  0.01  0.01\n");
+    fprintf(outfile,"\nMP EVS     1  0.00  0.00  0.00  0.00  0.00  0.00\n");
     fprintf(outfile,"MP MUC     1.0\n");
     fprintf(outfile,"MP MU      0.0\n");
     fprintf(outfile,"MP RHO     990\n");
@@ -77,20 +78,30 @@ void write_bc_file(MESH *mesh){
 
     for (i=0; i<mesh->nseries; i++){
         fprintf(outfile,"#\nSERIES BC  %i  2  0  0  0  0\n", i+1);
-        fprintf(outfile,"    % 23.15E    % 23.15E\n", mesh->t0,   mesh->series[i]);
-        fprintf(outfile,"    % 23.15E    % 23.15E\n", mesh->tf*5, mesh->series[i]);
+        fprintf(outfile,"    % 14.6E    % 14.6E\n", 0.0/*mesh->t0*/,   mesh->series[i]);
+        fprintf(outfile,"    % 14.6E    % 14.6E\n", mesh->tf*100, mesh->series[i]);
     }
+    ///* GKC temporary */
+    //int j, ntsteps = (int)((mesh->tf-0.0/*mesh->t0*/)/mesh->dt) + 3;
+    //double curt = 0.;
+    //fprintf(outfile,"#\nSERIES BC  %i  %i  0  0  0  0\n", i+1, ntsteps);
+    //for (j=0, curt=0.0; j<ntsteps; j++, curt+=mesh->dt){
+    //    fprintf(outfile,"    % 14.6E    % 14.6E\n", curt, 3.0*(sin(4.0*PI*curt/mesh->tf)));
+    //}
 
     fprintf(outfile,"\n#Output\nSERIES AWRITE  %i  1  0  0  0  0\n", mesh->nseries+1);
-    fprintf(outfile,"0     % 23.15E     % 23.15E     0\n", mesh->tf*5, mesh->awrite);
+    fprintf(outfile,"% 14.6E     % 14.6E     % 14.6E     0\n", 0.0/*mesh->t0*/, mesh->tf*100, mesh->awrite);
 
     fprintf(outfile,"\n#Time step\nSERIES DT  %i  2  0  0  0  0\n", mesh->nseries+2);
-        fprintf(outfile,"    % 23.15E    % 23.15E\n", mesh->t0,   mesh->dt);
-        fprintf(outfile,"    % 23.15E    % 23.15E\n", mesh->tf*5, mesh->dt);
+        fprintf(outfile,"    % 14.6E    % 14.6E\n", 0.0/*mesh->t0*/,   mesh->dt);
+        fprintf(outfile,"    % 14.6E    % 14.6E\n", mesh->tf*100, mesh->dt);
 
-    fprintf(outfile,"\nTC T0  % 23.15E  0\n",mesh->t0);
-    fprintf(outfile,"TC TF  % 23.15E  0\n",mesh->tf);
+    fprintf(outfile,"\nTC T0  % 14.6E  0\n",mesh->t0);
+    fprintf(outfile,"TC TF  % 14.6E  0\n",mesh->tf);
 
+    fprintf(outfile,"\n#Enable XDMF output\n");
+    fprintf(outfile,"PC XDF\n");
+    
     fprintf(outfile,"\n#Shallow water boundary Conditions");
     for (i=0; i<mesh->nboundaries; i++){
         switch (mesh->boundary[i].type){
@@ -155,6 +166,7 @@ void write_hotstart_file(MESH *mesh){
     outfile = fopen(hotstartfilename,"w");
     assert(outfile!=NULL);
 
+    /* Write depths. */
     fprintf(outfile,"DATASET\n");
     fprintf(outfile,"OBJTYPE \"mesh2D\"\n");
     fprintf(outfile,"BEGSCL\n");
@@ -167,8 +179,24 @@ void write_hotstart_file(MESH *mesh){
         depth = max2(-SMALL, depth);
         fprintf(outfile,"    % 20.15f\n", depth);
     }
-
     fprintf(outfile, "ENDDS");
+
+    ///* Write concentration. */
+    //fprintf(outfile,"DATASET\n");
+    //fprintf(outfile,"OBJTYPE \"mesh2D\"\n");
+    //fprintf(outfile,"BEGSCL\n");
+    //fprintf(outfile,"ND %10i\n", mesh->nnodes);
+    //fprintf(outfile,"NC %10i\n", mesh->nelems2d);
+    //fprintf(outfile,"NAME ICON 1\n");
+    //fprintf(outfile,"TS 0 0\n");
+    //for (i=0; i<mesh->nnodes; i++){
+    //    double conc = 35.0*(mesh->xyz[i].x - mesh->cornernodes[1].x)
+    //                /      (mesh->cornernodes[0].x - mesh->cornernodes[1].x);
+    //    conc = max2(0.0, conc);
+    //    fprintf(outfile,"    % 20.15f\n", conc);
+    //}
+    //fprintf(outfile, "ENDDS");
+
     fclose(outfile);
 }
 
@@ -232,6 +260,12 @@ void write_superfile(MESH *mesh, int nmeshes){
         fprintf(outfile, "\n    IP ITL  % 23.14E", mesh[j].itl);
         fprintf(outfile, "\n    IP NIT  %3i", mesh[j].nit);
         fprintf(outfile, "\n    IP MIT  %3i", mesh[j].mit);
+
+
+        fprintf(outfile, "\n\n    #Overriding timing information:");
+        fprintf(outfile, "\n    TC T0  % 9.1f", mesh[j].t0);
+        fprintf(outfile, "\n    TC TF  % 9.1f", mesh[j].tf);
+        fprintf(outfile, "\n    TC DT  % 9.1f", mesh[j].dt);
         /* Note : stopped using the value of j now. */
 
         if (nsubinterfaces>0) {
@@ -315,6 +349,8 @@ void write_superfile(MESH *mesh, int nmeshes){
                                     fprintf(outfile, "\n    IFCSM  %i  %i  %i", mesh[j].subID+1, mesh[jj].subID+1, nedges1);
                                     fprintf(outfile, "    !  Interface between supermodel %i, submodel %i and supermodel %i, submodel %i contains %i coupled edge/face columns.",
                                                                            mesh[j].supID+1, mesh[j].subID+1, mesh[jj].supID+1, mesh[jj].subID+1, nedges1);
+                                    fprintf(outfile, "\n    CPL    %i  %i", b1->str+1, b2->str+1);
+                                    fprintf(outfile, "       !  Edge/Face strings %i and %i are weakly coupled.",b1->str+1, b2->str+1);
                                     // othermodelfound=YES;
                                 }
                             }

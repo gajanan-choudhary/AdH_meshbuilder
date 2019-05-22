@@ -1,0 +1,108 @@
+############################################################### For allocating memory
+NSUPMOD  1                                                    # Number of supermodels
+NSUBMOD  3                                                    # Number of submodels in each supermodel
+############################################################### Supermodel 1, Submodel 1 details below
+SUPMOD  1  SUBMOD  1  NAME  lock2d1                           #
+NROWS   5                                                     # Number of divisions between Eta=-1 and Eta=1
+NCOLS   6                                                     # Number of divisions between Ksi=-1 and Ksi=1
+NCORND  4                                                     # 
+
+   ND   1   -0.75  -0.1  -0.2                                 # Mapped to (-1, -1)
+   ND   2   -1.00  -0.1  -0.2                                 # Mapped to ( 1, -1)
+   ND   3   -1.00   0.1  -0.2                                 # Mapped to ( 1,  1)
+   ND   4   -0.75   0.1  -0.2                                 # Mapped to (-1,  1)
+
+   WSE  1  0.0E+00                                            # Water surface elevations at t = TSTART
+   WSE  2  0.0E+00                                            #
+   WSE  3  0.0E+00                                            #
+   WSE  4  0.0E+00                                            #
+
+   EGS  1  1  4  ! East, Interface                            # Boundary edges
+   EGS  2  4  3  ! North                                      #
+   EGS  3  3  2  ! West                                       #
+   EGS  4  2  1  ! South                                      #
+
+BC  1  0.000E+00        ! No Flow                             # SERIES BC  <ID>  2
+
+INT  1                                                        # HY INT
+VEL  2  1                                                     # NB VEL
+VEL  3  1                                                     # NB VEL
+VEL  4  1                                                     # NB VEL
+
+############################################################### Supermodel 1, Submodel 1 details below
+SUPMOD  1  SUBMOD  2  NAME  lock3d                            #
+NROWS   5                                                     # Number of divisions between Eta=-1 and Eta=1
+NCOLS  31                                                     # Number of divisions between Ksi=-1 and Ksi=1
+NCORND  4                                                     # 
+
+   ND   1    -0.75   0.1  -0.2                                # Mapped to (-1, -1)
+   ND   2     0.75   0.1  -0.2                                # Mapped to ( 1, -1)
+   ND   3     0.75  -0.1  -0.2                                # Mapped to ( 1,  1)
+   ND   4    -0.75  -0.1  -0.2                                # Mapped to (-1,  1)
+
+   WSE  1  0.0E+00                                            # Water surface elevations at t = TSTART
+   WSE  2  0.0E+00                                            #
+   WSE  3  0.0E+00                                            #
+   WSE  4  0.0E+00                                            #
+
+   EGS  1  4  1  ! East, Interface                            # Boundary edges
+   EGS  2  3  4  ! North                                      #
+   EGS  3  2  3  ! West, Interface                            #
+   EGS  4  1  2  ! South                                      #
+
+BC  1  0.000E+00        ! No Flow                             # SERIES BC  <ID>  2
+
+INT  1                                                        # HY INT
+VEL  2  1                                                     # NB VEL
+INT  3                                                        # HY INT
+VEL  4  1                                                     # NB VEL
+
+############################################################### Supermodel 1, Submodel 1 details below
+SUPMOD  1  SUBMOD  3  NAME  lock2d2                           #
+NROWS   5                                                     # Number of divisions between Eta=-1 and Eta=1
+NCOLS   6                                                     # Number of divisions between Ksi=-1 and Ksi=1
+NCORND  4                                                     # 
+
+   ND   1    1.00    0.1  -0.2                                # Mapped to (-1, -1)
+   ND   2    0.75    0.1  -0.2                                # Mapped to ( 1, -1)
+   ND   3    0.75   -0.1  -0.2                                # Mapped to ( 1,  1)
+   ND   4    1.00   -0.1  -0.2                                # Mapped to (-1,  1)
+
+   WSE  1  0.0E+00                                            # Water surface elevations at t = TSTART
+   WSE  2  0.0E+00                                            #
+   WSE  3  0.0E+00                                            #
+   WSE  4  0.0E+00                                            #
+
+   EGS  1  1  4  ! East                                       # Boundary edges
+   EGS  2  4  3  ! North                                      #
+   EGS  3  3  2  ! West, Interface                            #
+   EGS  4  2  1  ! South                                      #
+
+BC  1  0.000E+00        ! No Flow                             # SERIES BC  <ID>  2
+
+VEL  1  1                                                     # NB VEL
+VEL  2  1                                                     # NB VEL
+INT  3                                                        # HY INT
+VEL  4  1                                                     # NB VEL
+
+############################################################### Common items between all submodels
+COMMON START
+
+TRN  1                                                        # Switch transport on/off
+#TEM  1                                                       # Optional, second order time stepping
+
+NTL   1.000E-06                                               # IP NTL
+ITL   1.000E-06                                               # IP ITL
+NIT   20                                                      # IP NIT
+MIT   500                                                     # IP MIT
+
+MNG     0.0015                                                # Manning's friction
+
+TSTART   0.0                                                  # Simulation starting time
+TEND    32.0                                                  # Simulation ending time
+
+AWRITE  0.50   ! Result writing interval                      # SERIES AWRITE  <ID>  1
+DT      0.50   ! Time step                                    # SERIES DT  <ID>  2
+
+COMMON END
+

@@ -26,10 +26,11 @@ void mesh_defaults(MESH *mesh, int nmeshes){
 
         mesh[i].trn    = 0;
         mesh[i].tem    = NO;
+        mesh[i].tpg    = -3.0; /* UNSET_FLT */
         mesh[i].nit    = 20;
         mesh[i].mit    = 500;
-        mesh[i].ntl    = 1.000E-09;
-        mesh[i].itl    = 1.000E-09;
+        mesh[i].ntl    = 1.000E-12;
+        mesh[i].itl    = 1.000E-12;
         mesh[i].mng    = 0.000E+00;
         mesh[i].t0     = 0.000E+00;
         mesh[i].tf     = 1.000E+04;
@@ -54,7 +55,7 @@ void mesh_init(MESH *mesh){
     assert(mesh->nrows>1);
     assert(mesh->ncols>1);
     assert(mesh->ncorners==NCORNERS);
-    assert(mesh->nseries>1);
+    assert(mesh->nseries>0);
 
     //mesh->name = (char *) malloc(sizeof(char) * MAXLINE);
     //sprintf(mesh->name, "mesh");

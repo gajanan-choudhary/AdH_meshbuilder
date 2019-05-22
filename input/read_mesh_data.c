@@ -333,6 +333,12 @@ void read_mesh_data(MESH **mesh_ptr, int *nummeshes, char infilename[MAXLINE]) {
                 if (status==READ_SUCCESS)
                     for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].tem = tempint;
                 break;
+            case CARD_TPG:
+                tempdouble = read_int_field(&data, &status);
+                if (tempdouble<0.0 || tempdouble>0.5) throw_error("Value between 0 and 1 allowed for Petrov Galerkin card TPG");
+                if (status==READ_SUCCESS)
+                    for (imesh=0; imesh<*nummeshes; imesh++) (*mesh_ptr)[imesh].tpg = tempdouble;
+                break;
             case CARD_NTL:
                 tempdouble = read_dbl_field(&data, &status);
                 if (tempdouble<=0. || tempdouble>1.) throw_error("0 < Tolerance (NTL) < 1.");

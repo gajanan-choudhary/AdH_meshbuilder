@@ -1,7 +1,7 @@
 #!/bin/bash
 
 columnfirstonoff="ON";
-
+debuglevel=0
 meshbuilder_root_path="/workspace/gajanan/adh/shiftx/mesh_builder_adh"
 #########################################################################
 
@@ -93,7 +93,7 @@ sleep 0.5
   fi
 ##########################################################
 
-cmake_args="$cmake_args "
+cmake_args="$cmake_args -DBUILD_DEBUG_LEVEL=$debuglevel"
 
 shortecho
 longecho

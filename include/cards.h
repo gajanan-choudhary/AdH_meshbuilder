@@ -58,7 +58,8 @@ typedef enum {
     CARD_NO      =            377,
     CARD_FOUT    =         347833,
     CARD_MNG     =           4406,
-    CARD_DTL     =           7933
+    CARD_DTL     =           7933,
+    CARD_TPG     =           4465
 } CARD;
 
 #endif

@@ -1,0 +1,82 @@
+############################################################### For allocating memory
+NSUPMOD  1                                                    # Number of supermodels
+NSUBMOD  2                                                    # Number of submodels in each supermodel
+############################################################### Supermodel 1, Submodel 1 details below
+SUPMOD  1  SUBMOD  1  NAME  dambreak3d                        #
+NROWS   16                                                    # Number of divisions between Eta=-1 and Eta=1
+NCOLS   59                                                    # Number of divisions between Ksi=-1 and Ksi=1
+NCORND   4                                                    # 
+
+   ND   1   -0.02  -0.075   0.00                              # Mapped to (-1, -1)
+   ND   2   -0.60  -0.075   0.00                              # Mapped to ( 1, -1)
+   ND   3   -0.60   0.075   0.00                              # Mapped to ( 1,  1)
+   ND   4   -0.02   0.075   0.00                              # Mapped to (-1,  1)
+
+   WSE  1  0.3                                                # Water surface elevations at t = TSTART
+   WSE  2  0.3                                                #
+   WSE  3  0.3                                                #
+   WSE  4  0.3                                                #
+
+   EGS  1  1  4  ! East, Interface                            # Boundary edges
+   EGS  2  4  3  ! North                                      #
+   EGS  3  3  2  ! West                                       #
+   EGS  4  2  1  ! South                                      #
+
+BC  1  0.000E+00        ! No Flow                             # SERIES BC  <ID>  2
+
+INT  1                                                        # HY INT
+VEL  2  1                                                     # NB VEL
+VEL  3  1                                                     # NB VEL
+VEL  4  1                                                     # NB VEL
+
+############################################################### Supermodel 1, Submodel 1 details below
+SUPMOD  1  SUBMOD  2  NAME  dambreak2d                        #
+NROWS   16                                                    # Number of divisions between Eta=-1 and Eta=1
+NCOLS  104                                                    # Number of divisions between Ksi=-1 and Ksi=1
+NCORND   4                                                    # 
+
+   ND   1   -0.02  -0.075   0.00                              # Mapped to (-1, -1)
+   ND   2    1.01  -0.075   0.00                              # Mapped to ( 1, -1)
+   ND   3    1.01   0.075   0.00                              # Mapped to ( 1,  1)
+   ND   4   -0.02   0.075   0.00                              # Mapped to (-1,  1)
+
+   WSE  1  0.3                                                # Water surface elevations at t = TSTART
+   WSE  2  0.0                                                #
+   WSE  3  0.0                                                #
+   WSE  4  0.3                                                #
+
+   EGS  1  4  1  ! West, Interface                            # Boundary edges
+   EGS  2  3  4  ! North                                      #
+   EGS  3  2  3  ! East                                       #
+   EGS  4  1  2  ! South                                      #
+
+DTL 0.01
+
+BC  1  0.000E+00        ! No Flow                             # SERIES BC  <ID>  2
+
+INT  1                                                        # HY INT
+VEL  2  1                                                     # NB VEL
+VEL  3  1                                                     # NB VEL
+VEL  4  1                                                     # NB VEL
+
+############################################################### Common items between all submodels
+COMMON START
+
+#TRN  0                                                        # Switch transport on/off
+TEM  1                                                        # Optional, second order time stepping
+
+NTL   1.000E-06                                               # IP NTL
+ITL   1.000E-06                                               # IP ITL
+NIT   20                                                      # IP NIT
+MIT   500                                                     # IP MIT
+
+MNG     1.00E-03                                              # Manning's friction
+
+TSTART  0.000E+00                                             # Simulation starting time
+TEND    2.000E+00                                             # Simulation ending time
+
+AWRITE  1.000E-02   ! Result writing interval                 # SERIES AWRITE  <ID>  1
+DT      1.000E-02   ! Time step                               # SERIES DT  <ID>  2
+
+COMMON END
+

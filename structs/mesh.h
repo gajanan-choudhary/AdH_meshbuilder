@@ -13,7 +13,7 @@ typedef struct{
     int nseries;
 
     /* Data expected to be common to all meshes below. Inefficient, I know, but futureproofing. */
-    int trn, tem;             // Transport, Second order time stepping.
+    int trn, tem, tpg;        // Transport, Second order time stepping, Petrov Galerkin coefficient tau
     int nit, mit;             // Solver iterations.
     double ntl, itl;          // Solver tolerances.
     double mng;               // Manning's friction value.
