@@ -43,6 +43,9 @@ void mesh_defaults(MESH *mesh, int nmeshes){
         mesh[i].series      = NULL;
         mesh[i].cornernodes = NULL;
         mesh[i].xyz         = NULL;
+#ifdef _PARABOLIC_BOWL
+        mesh[i].u           = NULL;
+#endif
         mesh[i].elem2d      = NULL;
         mesh[i].boundary    = NULL;
         mesh[i].elem1d      = NULL;
@@ -79,6 +82,11 @@ void mesh_init(MESH *mesh){
     mesh->xyz = (VECT3D *) malloc(sizeof(VECT3D) * mesh->nnodes);
     checkmem(mesh->xyz);
 
+#ifdef _PARABOLIC_BOWL
+    mesh->u = (VECT3D *) malloc(sizeof(VECT3D) * mesh->nnodes);
+    checkmem(mesh->u);
+#endif
+
     mesh->elem2d = (ELEM2D *) malloc(sizeof(ELEM2D) * mesh->nelems2d);
     checkmem(mesh->elem2d);
 
@@ -98,6 +106,11 @@ void mesh_init(MESH *mesh){
         mesh->xyz[i].x = 0.0;
         mesh->xyz[i].y = 0.0;
         mesh->xyz[i].z = 0.0;
+#ifdef _PARABOLIC_BOWL
+        mesh->u[i].x = 0.0;
+        mesh->u[i].y = 0.0;
+        mesh->u[i].z = 0.0;
+#endif
         mesh->wse[i] = 0.0;
     }
     for (i=0; i<mesh->nelems2d; i++){
@@ -125,6 +138,9 @@ void mesh_free(MESH **mesh_ptr, int nmeshes){
         free((*mesh_ptr)[i].series);
         free((*mesh_ptr)[i].cornernodes);
         free((*mesh_ptr)[i].xyz);
+#ifdef _PARABOLIC_BOWL
+        free((*mesh_ptr)[i].u);
+#endif
         free((*mesh_ptr)[i].elem2d);
         free((*mesh_ptr)[i].boundary);
         free((*mesh_ptr)[i].elem1d);

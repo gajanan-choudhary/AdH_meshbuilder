@@ -28,6 +28,9 @@ typedef struct{
 
     VECT3D *cornernodes;      // Corner nodes' co-ordinates, starting bottom left, going anticlockwise
     VECT3D *xyz;              // Co-ordinates of all nodes, bathymetry in the third co-ordinate
+#ifdef _PARABOLIC_BOWL
+    VECT3D *u;                // Initial velocity
+#endif
 
     ELEM2D *elem2d;           // Triangular elements
     ELEM1D *boundary;         // Boundary edges

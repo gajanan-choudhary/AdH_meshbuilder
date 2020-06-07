@@ -1,8 +1,13 @@
 #include "global_header.h"
 
+#ifdef _PARABOLIC_BOWL
+#define A  1600.0
+#define H0    1.58984830714
+#else
 #define H0   1.0e-9 
+#endif
 
-static int DEBUG = OFF;
+static int DEBUG = ON;
 
 void generate_nodes(MESH *mesh){
     int i, j;
@@ -27,6 +32,43 @@ void generate_nodes(MESH *mesh){
             //double tempy = mesh->xyz[count].y;
             //mesh->xyz[count].x = tempx/sqrt(2) - tempy/sqrt(2);
             //mesh->xyz[count].y = tempx/sqrt(2) + tempy/sqrt(2);
+
+#ifdef _PARABOLIC_BOWL
+            double r = sqrt(mesh->xyz[count].x*mesh->xyz[count].x+mesh->xyz[count].y*mesh->xyz[count].y);
+            mesh->wse[count] = H0*2*mesh->xyz[count].x/A - H0;
+            mesh->xyz[count].z = -H0*(1-(r*r)/(A*A));
+
+            double omega = sqrt(2*G*H0)/A;
+            mesh->u[count].x = 0.0;
+            mesh->u[count].y = sqrt(2*G*H0);//A*omega;
+            mesh->u[count].z = 0.0;
+
+            if (mesh->wse[count] - mesh->xyz[count].z < 0) {
+                mesh->wse[count] = mesh->xyz[count].z;
+                mesh->u[count].y = 0.0;
+            }
+#endif
+
+
+#ifdef _TRAPEZOID
+            // Side slope: 2
+            // Trapezoid width is mapped to reference element.
+            double slope = 2.0;
+            VECT3D quarter; // centerline values
+            if (eta>0.5){
+                VECT3D_EVAL_SHP_FNCTN(quarter, ksi, 0.5, mesh->cornernodes);
+                mesh->xyz[count].z += fabs(mesh->xyz[count].y - quarter.y)*slope;
+            }
+            else if (eta<-0.5){
+                VECT3D_EVAL_SHP_FNCTN(quarter, ksi,-0.5, mesh->cornernodes);
+                mesh->xyz[count].z += fabs(mesh->xyz[count].y - quarter.y)*slope;
+            }
+
+            if (mesh->wse[count] - mesh->xyz[count].z < 0) {
+                mesh->wse[count] = mesh->xyz[count].z;
+            }
+#endif
+
 
 #ifdef _DEBUG
             if (DEBUG) printf("\nND |% 6i| % 23.14e | % 23.14e | % 23.14e | % 23.14e", count+1,

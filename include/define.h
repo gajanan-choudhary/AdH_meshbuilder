@@ -14,6 +14,8 @@
 
 /* Constants */
 #define SMALL  1.0E-06
+#define PI     3.1415926535897932384626433832795
+#define G      9.81
 #define ON     1
 #define OFF    0
 #define YES    1

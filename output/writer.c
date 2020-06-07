@@ -1,5 +1,5 @@
 #include "global_header.h"
-#define PI 3.14159265358979323846264338
+
 static int DEBUG = OFF;
 
 /*****************************************************************************************/
@@ -78,11 +78,11 @@ void write_bc_file(MESH *mesh){
 
     for (i=0; i<mesh->nseries; i++){
         fprintf(outfile,"#\nSERIES BC  %i  2  0  0  0  0\n", i+1);
-        fprintf(outfile,"    % 14.6E    % 14.6E\n", 0.0/*mesh->t0*/,   mesh->series[i]);
+        fprintf(outfile,"    % 14.6E    % 14.6E\n",-mesh->tf*100,   mesh->series[i]);
         fprintf(outfile,"    % 14.6E    % 14.6E\n", mesh->tf*100, mesh->series[i]);
     }
     ///* GKC temporary */
-    //int j, ntsteps = (int)((mesh->tf-0.0/*mesh->t0*/)/mesh->dt) + 3;
+    //int j, ntsteps = (int)((mesh->tf-mesh->t0)/mesh->dt) + 3;
     //double curt = 0.;
     //fprintf(outfile,"#\nSERIES BC  %i  %i  0  0  0  0\n", i+1, ntsteps);
     //for (j=0, curt=0.0; j<ntsteps; j++, curt+=mesh->dt){
@@ -90,10 +90,10 @@ void write_bc_file(MESH *mesh){
     //}
 
     fprintf(outfile,"\n#Output\nSERIES AWRITE  %i  1  0  0  0  0\n", mesh->nseries+1);
-    fprintf(outfile,"% 14.6E     % 14.6E     % 14.6E     0\n", 0.0/*mesh->t0*/, mesh->tf*100, mesh->awrite);
+    fprintf(outfile,"% 14.6E     % 14.6E     % 14.6E     0\n",-mesh->tf*100, mesh->tf*100, mesh->awrite);
 
     fprintf(outfile,"\n#Time step\nSERIES DT  %i  2  0  0  0  0\n", mesh->nseries+2);
-        fprintf(outfile,"    % 14.6E    % 14.6E\n", 0.0/*mesh->t0*/,   mesh->dt);
+        fprintf(outfile,"    % 14.6E    % 14.6E\n",-mesh->tf*100,   mesh->dt);
         fprintf(outfile,"    % 14.6E    % 14.6E\n", mesh->tf*100, mesh->dt);
 
     fprintf(outfile,"\nTC T0  % 14.6E  0\n",mesh->t0);
@@ -182,7 +182,7 @@ void write_hotstart_file(MESH *mesh){
     fprintf(outfile, "ENDDS");
 
     ///* Write concentration. */
-    //fprintf(outfile,"DATASET\n");
+    //fprintf(outfile,"\nDATASET\n");
     //fprintf(outfile,"OBJTYPE \"mesh2D\"\n");
     //fprintf(outfile,"BEGSCL\n");
     //fprintf(outfile,"ND %10i\n", mesh->nnodes);
@@ -196,7 +196,20 @@ void write_hotstart_file(MESH *mesh){
     //    fprintf(outfile,"    % 20.15f\n", conc);
     //}
     //fprintf(outfile, "ENDDS");
-
+#ifdef _PARABOLIC_BOWL
+    /* Write velocity. */
+    fprintf(outfile,"\nDATASET\n");
+    fprintf(outfile,"OBJTYPE \"mesh2D\"\n");
+    fprintf(outfile,"BEGVEC\n");
+    fprintf(outfile,"ND %10i\n", mesh->nnodes);
+    fprintf(outfile,"NC %10i\n", mesh->nelems2d);
+    fprintf(outfile,"NAME IV\n");
+    fprintf(outfile,"TS 0 0\n");
+    for (i=0; i<mesh->nnodes; i++){
+        fprintf(outfile,"    % 23.15e % 23.15e %23.15e\n", mesh->u[i].x, mesh->u[i].y, mesh->u[i].z);
+    }
+    fprintf(outfile, "ENDDS");
+#endif
     fclose(outfile);
 }
 

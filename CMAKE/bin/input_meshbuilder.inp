@@ -2,29 +2,30 @@
 NSUPMOD  1                                                    # Number of supermodels
 NSUBMOD  1                                                    # Number of submodels in each supermodel
 ############################################################### Supermodel 1, Submodel 1 details below
-SUPMOD  1  SUBMOD  1  NAME  sloshfull2d.0                     #
+SUPMOD  1  SUBMOD  1  NAME  large                             #
 NROWS   2                                                     # Number of divisions between Eta=-1 and Eta=1
-NCOLS   3                                                     # Number of divisions between Ksi=-1 and Ksi=1
+NCOLS   51                                                    # Number of divisions between Ksi=-1 and Ksi=1
 NCORND  4                                                     # 
 
-   ND   1        0.0      0.0  -82.50                         # Mapped to (-1, -1)
-   ND   2    25600.0      0.0  -82.50                         # Mapped to ( 1, -1)
-   ND   3    25600.0  12800.0  -82.50                         # Mapped to ( 1,  1)
-   ND   4        0.0  12800.0  -82.50                         # Mapped to (-1,  1)
+   ND   1      600.0      0.0  -2.0                           # Mapped to (-1, -1)
+   ND   2        0.0      0.0  -2.0                           # Mapped to ( 1, -1)
+   ND   3        0.0     12.0  -2.0                           # Mapped to ( 1,  1)
+   ND   4      600.0     12.0  -2.0                           # Mapped to (-1,  1)
 
    WSE  1      0.0                                            # Water surface elevations at t = TSTART
    WSE  2      0.0                                            #
    WSE  3      0.0                                            #
    WSE  4      0.0                                            #
 
-   EGS  1  4  1  ! West                                       # Boundary edges
+   EGS  1  2  3  ! East, Interface                            # Boundary edges
    EGS  2  3  4  ! North                                      #
-   EGS  3  2  3  ! East                                       #
+   EGS  3  4  1  ! West                                       #
    EGS  4  1  2  ! South                                      #
 
-BC  1  0.000E+00        ! No Flow                             # SERIES BC  <ID>  2
+BC  1  0.000E+00        ! No Flow                             # SERIES BC  <ID>  1
+BC  2  0.000E+00        ! GSSHA inflow                        # SERIES BC  <ID>  2
 
-VEL  1  1                                                     # NB VEL
+VEL  1  2                                                     # NB VEL
 VEL  2  1                                                     # NB VEL
 VEL  3  1                                                     # NB VEL
 VEL  4  1                                                     # NB VEL
@@ -32,22 +33,22 @@ VEL  4  1                                                     # NB VEL
 ############################################################### Common items between all submodels
 COMMON START
 
-#TRN  0                                                        # Switch transport on/off
-TEM  1                                                        # Optional, second order time stepping
-TPG  0                                                        #
+#TRN  1                                                        # Switch transport on/off
+#TEM  1                                                        # Optional, second order time stepping
+#TPG  0                                                        #
 
-NTL   1.000E-12                                               # IP NTL
-ITL   1.000E-12                                               # IP ITL
+NTL   1.000E-9                                               # IP NTL
+ITL   1.000E-9                                               # IP ITL
 NIT   15                                                      # IP NIT
 MIT   500                                                     # IP MIT
 
-MNG     0.000E+00                                             # Manning's friction
+MNG     2.000E-03                                             # Manning's friction
 
-TSTART  2.000E+01                                             # Simulation starting time
-TEND    1.080E+04                                             # Simulation ending time
+TSTART  0.000E+00                                             # Simulation starting time
+TEND    1.800E+04                                             # Simulation ending time
 
-AWRITE  3.000E+02   ! Result writing interval                 # SERIES AWRITE  <ID>  1
-DT      1.000E+01   ! Time step                               # SERIES DT  <ID>  2
+AWRITE  3.000E+01   ! Result writing interval                 # SERIES AWRITE  <ID>  1
+DT      3.000E+01   ! Time step                               # SERIES DT  <ID>  2
 
 COMMON END
 

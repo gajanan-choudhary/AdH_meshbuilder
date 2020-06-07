@@ -1,6 +1,8 @@
 #!/bin/bash
 
 columnfirstonoff="ON";
+parabolicbowlonoff="OFF";
+trapezoidonoff="OFF"
 debuglevel=0
 meshbuilder_root_path="/workspace/gajanan/adh/shiftx/mesh_builder_adh"
 #########################################################################
@@ -27,7 +29,7 @@ if [ ! -d $meshbuilder_root_path ]; then
 fi
 cleanstatus=-1
 runstatus=-1
-cmake_args=" -DUSE_COLUMNFIRST=$columnfirstonoff"
+cmake_args=" -DUSE_COLUMNFIRST=$columnfirstonoff -DTEST_PARABOLIC_BOWL=$parabolicbowlonoff -DTEST_TRAPEZOID=$trapezoidonoff"
 
 ####################################################################################################################
 checkpoint(){

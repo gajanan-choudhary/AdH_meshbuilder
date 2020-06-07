@@ -27,6 +27,18 @@ if (USE_COLUMNFIRST)
     add_definitions(-D_COLUMNFIRST)
 endif (USE_COLUMNFIRST)
 
+option(TEST_PARABOLIC_BOWL "Parabolic bowl testcase" OFF)
+if (TEST_PARABOLIC_BOWL)
+    message("Build parabolic bowl bathymetry by definition _PARABOLIC_BOWL")
+    add_definitions(-D_PARABOLIC_BOWL)
+endif (TEST_PARABOLIC_BOWL)
+
+option(TEST_TRAPEZOID "Trapezoidal cross-section" OFF)
+if (TEST_TRAPEZOID)
+    message("Build parabolic bowl bathymetry by definition _TRAPEZOID")
+    add_definitions(-D_TRAPEZOID)
+endif (TEST_TRAPEZOID)
+
 #####################################
 # EXE LINKER FLAGS
 set(CMAKE_EXE_LINKER_FLAGS "-lm")
