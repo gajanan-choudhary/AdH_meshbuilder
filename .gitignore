@@ -1,0 +1,17 @@
+CMAKE/builder
+CMAKE/CMakeCache.txt
+CMAKE/CMakeFiles
+CMAKE/cmake_install.cmake
+CMAKE/input
+CMAKE/lib
+CMAKE/main
+CMAKE/Makefile
+CMAKE/output
+CMAKE/structs
+
+CMAKE/bin/slosh*
+CMAKE/bin/flume*
+CMAKE/bin/parabola*
+CMAKE/bin/superfile.in
+
+CMAKE/bin/runoutput.txt
